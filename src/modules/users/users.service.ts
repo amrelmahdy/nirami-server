@@ -24,6 +24,12 @@ export class UsersService {
         return users
     }
 
+
+    async register(user: User): Promise<User> {
+        const res = await this.usersModel.create({ ...user,  role: UserRole.USER });
+        return res
+    }
+
     async create(user: User): Promise<User> {
         const { email, phone } = user;
         const userIsTaken = await this.findByEmailOrPhone(email, phone)
@@ -34,7 +40,7 @@ export class UsersService {
         const salt = await bcryptjs.genSalt(10);
 
         const hash = await bcryptjs.hash(user.password, salt)
-        
+
         const res = await this.usersModel.create({ ...user, password: hash, role: UserRole.ADMIN });
 
         return res
@@ -43,6 +49,7 @@ export class UsersService {
 
     async findById(id: string): Promise<User> {
         const user = await this.usersModel.findById(id)
+            .populate('favList');
         // .populate("wish_list addresses");
         if (!user) {
             throw new NotFoundException("User not found.");

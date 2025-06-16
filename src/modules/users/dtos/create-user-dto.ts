@@ -6,10 +6,10 @@ import { Product } from "src/modules/products/schemas/product.schema";
 
 export class CreateUserDto {
     @IsNotEmpty()
-    first_name: string;
+    firstName: string;
 
     @IsNotEmpty()
-    last_name: string;
+    lastName: string;
 
     @IsEmail()
     @IsNotEmpty()

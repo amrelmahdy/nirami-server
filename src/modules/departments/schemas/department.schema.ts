@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { getDefaultImagePath } from "src/config/utils";
 
 
+
 @Schema({
     timestamps: true,
     toJSON: {
@@ -23,3 +24,10 @@ export class Department {
 }
 
 export const departmentSchema = SchemaFactory.createForClass(Department);
+
+
+departmentSchema.virtual('categories', {
+    ref: 'Category',
+    localField: '_id',
+    foreignField: 'department',
+});

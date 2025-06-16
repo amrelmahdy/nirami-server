@@ -8,6 +8,7 @@ import { CreateUserDto } from '../users/dtos/create-user-dto';
 import { SendOtpDto } from './dtos/send-otp-dto';
 import { VerifyOtpDto } from './dtos/verify-otp-dto';
 import { OtpAuthGuard } from './guards/otp-auth-guard';
+import { LoginRegisterWithOtpDto } from './dtos/login-register.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -19,11 +20,11 @@ export class AuthController {
         return this.authService.login(req.user)
     }
 
-    @Post("register")
-    async register(@Body() user: CreateUserDto): Promise<any> {
-        return this.authService.register(user)
+    @Post('logout')
+    @UseGuards(JwtAuthGuard)
+    async logout(@Request() req) {
+        return this.authService.logout(req.user);
     }
-
 
     @UseGuards(JwtAuthGuard)
     @Get("user")
@@ -37,27 +38,34 @@ export class AuthController {
         return this.authService.refreshToken(req.user);
     }
 
-
     @UseGuards(JwtAuthGuard)
     @Post("decode")
     async decodeToken(@Body("token") token: string) {
         return this.authService.decodeToken(token);
     }
 
+
     @Post('send-otp')
     async sendOtp(@Body() body: SendOtpDto) {
-        return this.authService.sendOtp(body.emailOrPhone);
+        return this.authService.sendOtp(body);
     }
 
     @Post('verify-otp')
     async verifyOtp(@Body() body: VerifyOtpDto) {
-        return this.authService.verifyOtp(body.emailOrPhone, body.otp);
+        return this.authService.verifyOtp(body.phoneOrEmail, body.otp);
     }
 
+    @Post("otp-register")
+    async register(@Body() body: LoginRegisterWithOtpDto): Promise<any> {
+        return this.authService.register(body)
+    }
 
     @Post('otp-login')
     @UseGuards(OtpAuthGuard)
     async loginWithOtp(@Request() req) {
         return this.authService.loginWithOtp(req.user); // Returns JWT or session token
     }
+
+
+
 }

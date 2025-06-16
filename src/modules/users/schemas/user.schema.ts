@@ -36,22 +36,22 @@ export enum Gender {
 
 export class User {
 
-    @Prop({ required: true })
-    first_name: string
+    @Prop({ required: false })
+    firstName: string
 
-    @Prop({ required: true })
-    last_name: string
+    @Prop({ required: false })
+    lastName: string
 
-    @Prop({ required: true, unique: true, lowercase: true })
+    @Prop({ required: false, unique: true, sparse: true, lowercase: true })
     email: string;
 
-    @Prop({ required: true, unique: true })
+    @Prop({ required: false, unique: true,  sparse: true })
     phone: string
 
     @Prop({ default: getDefaultImagePath })
     image: string;
 
-    @Prop({ required: true })
+    @Prop({ required: false })
     password: string; // only used by admins
 
     @Prop({ default: false })
@@ -106,4 +106,13 @@ export class User {
 }
 
 
-export const userSchema = SchemaFactory.createForClass(User)
+export const userSchema = SchemaFactory.createForClass(User);
+
+
+// Add custom validation: either email or phone is required
+userSchema.pre('validate', function (next) {
+  if (!this.email && !this.phone) {
+    return next(new Error('Either email or phone is required.'));
+  }
+  next();
+});

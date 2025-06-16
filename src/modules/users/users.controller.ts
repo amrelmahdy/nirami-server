@@ -34,6 +34,8 @@ export class UsersController {
         return this.userService.findById(id);
     }
 
+ 
+
     // @UseGuards(JwtAuthGuard)
     // @Put(":id")
     // async updateUser(@Param("id") id: string, @Body() body: EditUserDto): Promise<User> {

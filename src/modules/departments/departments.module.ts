@@ -3,9 +3,12 @@ import { DepartmentsService } from './departments.service';
 import { DepartmentsController } from './departments.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { departmentSchema } from './schemas/department.schema';
+import { CategoriesModule } from '../categories/categories.module';
 
 @Module({
-  imports:[MongooseModule.forFeature([{ name: "Department",schema: departmentSchema }])],
+  imports:[
+    CategoriesModule,
+    MongooseModule.forFeature([{ name: "Department",schema: departmentSchema }])],
   providers: [DepartmentsService],
   controllers: [DepartmentsController]
 })

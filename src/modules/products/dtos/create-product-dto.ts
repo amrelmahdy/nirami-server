@@ -9,25 +9,10 @@ import {
 } from 'class-validator';
 import { IsLocalizedString } from 'src/config/validation';
 import { Brand } from 'src/modules/brands/schemas/brand.schema';
+import { Group } from 'src/modules/groups/schemas/group.schema';
+import { Variant } from 'src/modules/variants/schemas/variant.schema';
 import { Image } from 'src/utils/schemas';
 
-class ImageDto {
-    @IsString()
-    @IsNotEmpty()
-    url: string;
-
-    @IsOptional()
-    @IsString()
-    public_id?: string;
-
-    @IsOptional()
-    @IsNumber()
-    width?: number;
-
-    @IsOptional()
-    @IsNumber()
-    height?: number;
-}
 
 export class CreateProductDto {
     @IsLocalizedString(['en', 'ar'], { message: 'Name must have valid language keys and strings' })
@@ -45,6 +30,9 @@ export class CreateProductDto {
     brand: Brand;
 
 
+    @IsNotEmpty()
+    group: Group;
+
     @IsNumber()
     price: number;
 
@@ -56,8 +44,11 @@ export class CreateProductDto {
 
     @IsOptional()
     @IsArray()
-    @ValidateNested({ each: true })
     images: Image[];
+
+     @IsOptional()
+    @IsArray()
+    variants: Variant[];
 
     @IsNotEmpty()
     maxQuantity: number;
@@ -71,7 +62,7 @@ export class CreateProductDto {
     @IsNumber()
     stock: number;
 
-    @IsOptional()
+    @IsNotEmpty()
     sku: string;
 
     @IsBoolean()

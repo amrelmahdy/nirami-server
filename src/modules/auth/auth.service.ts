@@ -23,8 +23,8 @@ export class AuthService {
             userId,
             username: user.email,
             sub: {
-                first_name: user.first_name,
-                last_name: user.last_name,
+                firstName: user.firstName,
+                lastName: user.lastName,
                 phone: user.phone,
             },
         };
@@ -49,50 +49,105 @@ export class AuthService {
     }
 
 
+    async logout(user: User) {
+        console.log("Logging out user:", user);
+    }
 
-    async register(body: User): Promise<any> {
-        // const now = Date.now()
-        // const { email, phone, password } = body;
-        // const userIsTaken = await this.usersService.findByEmailOrPhone(email, phone)
-        // if (userIsTaken) {
-        //     throw new BadRequestException("User has already been taken.")
-        // }
-        // const salt = await bcryptjs.genSalt(10);
+    async loginWithOtp(user: User) {
+        const now = Date.now()
 
-        // const hash = await bcryptjs.hash(password, salt)
+        const userId = (user as any)._id
 
-        // body.password = hash;
+        const payload = {
+            userId: userId,
+            username: user.email || user.phone,
+            sub: {
+                firstNname: user.firstName,
+                lastNname: user.lastName,
+                phone: user.phone,
+                email: user.email
+            }
+        };
+        // Calculate expiration time for access token (1 day)
+        const accessTokenExpiresAt = now + (86400 * 1000); // 86400 seconds * 1000 milliseconds/second
+        // Calculate expiration time for refresh token (7 days)
+        const refreshTokenExpiresAt = now + (7 * 24 * 60 * 60 * 1000); // 7 days * 24 hours/day * 60 minutes/hour * 60 seconds/minute * 1000 milliseconds/second
 
-        // const user = await this.usersService.create(body);
+        return {
+            accessToken: this.jwtService.sign(payload, { expiresIn: '86400s' }),
+            refreshToken: this.jwtService.sign(payload, { expiresIn: '7d' }),
+            tokenType: "Bearer",
+            expiresIn: "86400",
+            expiresAt: `${accessTokenExpiresAt}`,
+            refreshExpiresIn: "604800",
+            refreshExpiresAt: `${refreshTokenExpiresAt}`,
+            userInfo: user
+        }
+    }
 
 
-        // const userId = (user as any).id
 
-        // const payload = {
-        //     userId: userId,
-        //     username: user.email || user.phone,
-        //     sub: {
-        //         first_name: user.first_name,
-        //         last_name: user.last_name,
-        //         phone: user.phone,
-        //         email: user.email
-        //     }
-        // };
-        // // Calculate expiration time for access token (1 day)
-        // const accessTokenExpiresAt = now + (86400 * 1000); // 86400 seconds * 1000 milliseconds/second
-        // // Calculate expiration time for refresh token (7 days)
-        // const refreshTokenExpiresAt = now + (7 * 24 * 60 * 60 * 1000); // 7 days * 24 hours/day * 60 minutes/hour * 60 seconds/minute * 1000 milliseconds/second
 
-        // return {
-        //     access_token: this.jwtService.sign(payload, { expiresIn: '86400s' }),
-        //     refresh_token: this.jwtService.sign(payload, { expiresIn: '7d' }),
-        //     token_type: "Bearer",
-        //     expires_in: "86400",
-        //     expires_at: `${accessTokenExpiresAt}`,
-        //     refresh_expires_in: "604800",
-        //     refresh_expires_at: `${refreshTokenExpiresAt}`,
-        //     userInfo: user
-        // }
+    async register(body: { phoneOrEmail: string }): Promise<any> {
+        const now = Date.now()
+        const { phoneOrEmail } = body;
+        console.log("phoneOrEmailphoneOrEmailphoneOrEmailphoneOrEmail", phoneOrEmail)
+
+        const userIsTaken = await this.usersService.findByEmailOrPhone(phoneOrEmail, phoneOrEmail)
+        if (userIsTaken) {
+            throw new BadRequestException("User has already been taken.")
+        }
+
+        // Validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        // Saudi phone: starts with 05, 5, or +9665, and 8 digits after
+        const saPhoneRegex = /^(?:\+9665|05|5)[0-9]{8}$/;
+
+        const isEmail = emailRegex.test(phoneOrEmail);
+        const isPhone = saPhoneRegex.test(phoneOrEmail);
+
+        const email = isEmail ? phoneOrEmail : null;
+        const phone = isPhone ? phoneOrEmail : null;
+
+        if (!isEmail && !isPhone) {
+            throw new BadRequestException("Input must be a valid email or Saudi phone number.");
+        }
+
+        const newUser: any = {}
+
+        if (email) newUser.email = email.toLowerCase().trim();
+        if (phone) newUser.phone = phone.trim();
+
+
+        const user = await this.usersService.register(newUser);
+
+        const userId = (user as any).id
+
+        const payload = {
+            userId: userId,
+            username: user.email || user.phone,
+            sub: {
+                firstNname: user.firstName,
+                lastNname: user.lastName,
+                phone: user.phone,
+                email: user.email
+            }
+        };
+        // Calculate expiration time for access token (1 day)
+        const accessTokenExpiresAt = now + (86400 * 1000); // 86400 seconds * 1000 milliseconds/second
+        // Calculate expiration time for refresh token (7 days)
+        const refreshTokenExpiresAt = now + (7 * 24 * 60 * 60 * 1000); // 7 days * 24 hours/day * 60 minutes/hour * 60 seconds/minute * 1000 milliseconds/second
+
+        return {
+            accessToken: this.jwtService.sign(payload, { expiresIn: '86400s' }),
+            refreshToken: this.jwtService.sign(payload, { expiresIn: '7d' }),
+            tokenType: "Bearer",
+            expiresIn: "86400",
+            expiresAt: `${accessTokenExpiresAt}`,
+            refreshExpiresIn: "604800",
+            refreshExpiresAt: `${refreshTokenExpiresAt}`,
+            userInfo: user
+        }
     }
 
     refreshToken(currentUser: any): any {
@@ -108,9 +163,9 @@ export class AuthService {
             }
         };
         return {
-            access_token: this.jwtService.sign(payload, { expiresIn: '86400s' }),
-            expires_in: "86400",
-            expires_at: `${accessTokenExpiresAt}`,
+            accessToken: this.jwtService.sign(payload, { expiresIn: '86400s' }),
+            expiresIn: "86400",
+            expiresAt: `${accessTokenExpiresAt}`,
         }
     }
 
@@ -136,16 +191,24 @@ export class AuthService {
     }
 
 
-    async sendOtp(emailOrPhone: string): Promise<any> {
+    async sendOtp(body: { phoneOrEmail: string }): Promise<any> {
 
-        const lockKey = `otp:${emailOrPhone}`;
+        const { phoneOrEmail } = body
+
+        const user = await this.usersService.findByEmailOrPhone(phoneOrEmail, phoneOrEmail);
+
+        if (!user) {
+            throw new BadRequestException({ code: 'user_not_found', message: 'User not found' });
+        }
+
+        const lockKey = `otp:${phoneOrEmail}`;
         const isLocked = await this.cacheService.getValue(lockKey);
 
-        // if (isLocked) {
-        //     throw new BadRequestException('Please wait before requesting a new OTP');
-        // }
+        if (isLocked) {
+            throw new BadRequestException('Please wait before requesting a new OTP');
+        }
 
-        const otp = await this.generateOtp(emailOrPhone);
+        const otp = await this.generateOtp(phoneOrEmail);
         // TODO: send otp via email or phone 
         return {
             success: true,
@@ -177,7 +240,7 @@ export class AuthService {
         }
 
         // Valid OTP — delete from Redis to enforce one-time use
-        //await this.cacheService.deleteValue(key);
+        await this.cacheService.deleteValue(key);
 
         return {
             success: true,
@@ -185,10 +248,6 @@ export class AuthService {
         };
     }
 
-
-    async loginWithOtp(user: User) {
-        console.log("user", user)
-    }
 
 
     async validateUser(username: string, password: string): Promise<Partial<User> | null> {
@@ -201,6 +260,9 @@ export class AuthService {
         const { password: _, __v, ...safeUser } = (user as any).toObject() ?? user;
         return safeUser;
     }
+
+
+
 
 
 }

@@ -1,7 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { Document } from 'mongoose';
+import mongoose, { Document, Types } from 'mongoose';
 import { getDefaultImagePath } from 'src/config/utils';
 import { Brand } from 'src/modules/brands/schemas/brand.schema';
+import { Variant } from 'src/modules/variants/schemas/variant.schema';
 import { Image } from 'src/utils/schemas';
 
 export type ProductDocument = Product & Document;
@@ -32,6 +33,9 @@ export class Product {
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Brand', required: true })
     brand: Brand;
 
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Group', required: true })
+    group: Brand;
+
     @Prop({ required: true })
     price: number;
 
@@ -44,14 +48,15 @@ export class Product {
     @Prop({ default: 0 })
     stock: number;
 
-    @Prop()
+    @Prop({ required: true, unique: true })
     sku: string;
 
-    @Prop({ default: 0 })
+    @Prop({ default: 5 })
     averageRating: number;
 
     @Prop({ default: 0 })
     reviewCount: number;
+
 
     @Prop({ default: getDefaultImagePath })
     productCardImage: string
@@ -59,9 +64,11 @@ export class Product {
     @Prop({ default: [] })
     images: Image[];
 
+    @Prop({ type: [{ type: Types.ObjectId, ref: 'Variant' }], default: [] }) 
+    variants: Variant[];
+
     @Prop({ default: false })
     isOutOfStock: boolean;
-
 
     @Prop({ default: false })
     isOnSale: boolean;

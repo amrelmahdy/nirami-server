@@ -50,7 +50,6 @@ export class UsersService {
     async findById(id: string): Promise<User> {
         const user = await this.usersModel.findById(id)
             .populate('favList');
-        // .populate("wish_list addresses");
         if (!user) {
             throw new NotFoundException("User not found.");
         }

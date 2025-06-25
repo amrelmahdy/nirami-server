@@ -1,6 +1,8 @@
+import { Type } from 'class-transformer';
 import {
     IsArray,
     IsBoolean,
+    IsMongoId,
     IsNotEmpty,
     IsNumber,
     IsOptional,
@@ -12,19 +14,44 @@ import { Brand } from 'src/modules/brands/schemas/brand.schema';
 import { Group } from 'src/modules/groups/schemas/group.schema';
 import { Variant } from 'src/modules/variants/schemas/variant.schema';
 import { Image } from 'src/utils/schemas';
+import { Product } from '../schemas/product.schema';
+import { LocalizedName } from 'src/utils/validation';
+
+
+
+export class ProductColor {
+    @ValidateNested()
+    @IsLocalizedString(['en', 'ar'], { message: 'Name must have valid language keys and strings' })
+    @Type(() => LocalizedName)
+    name: LocalizedName;
+
+    @IsString()
+    value: string; // e.g. "#00FF00"
+}
+
 
 
 export class CreateProductDto {
     @IsLocalizedString(['en', 'ar'], { message: 'Name must have valid language keys and strings' })
-    name: Record<string, string>;
-  
+    @Type(() => LocalizedName)
+    name: LocalizedName;
+
     @IsLocalizedString(['en', 'ar'], { message: 'Description must have valid language keys and strings' })
     @IsNotEmpty()
-    description: Record<string, string>;
+    description: LocalizedName;
 
     @IsLocalizedString(['en', 'ar'], { message: 'Components must have valid language keys and strings' })
     @IsOptional()
-    components: Record<string, string>;
+    components: LocalizedName;
+
+    @IsOptional()
+    @IsMongoId({ message: 'parentProduct must be a valid Mongo ID' })
+    parentProduct?: Product;
+
+    @IsOptional()
+    @ValidateNested()
+    @Type(() => ProductColor)
+    color?: ProductColor;
 
     @IsNotEmpty()
     brand: Brand;
@@ -46,9 +73,6 @@ export class CreateProductDto {
     @IsArray()
     images: Image[];
 
-     @IsOptional()
-    @IsArray()
-    variants: Variant[];
 
     @IsNotEmpty()
     maxQuantity: number;

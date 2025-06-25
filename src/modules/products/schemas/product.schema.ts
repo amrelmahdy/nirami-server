@@ -22,13 +22,25 @@ export type ProductDocument = Product & Document;
 export class Product {
 
     @Prop({ type: Object })
-    name: Record<string, string>;
+    name: { en: string; ar: string };
 
     @Prop({ type: Object })
-    description: Record<string, string>;
+    description: { en: string; ar: string };
 
     @Prop({ type: Object })
-    components: Record<string, string>;
+    components: { en: string; ar: string };
+
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: null })
+    parentProduct?: Product; // null = this is the main product
+
+    @Prop({
+        type: Object,
+        default: null,
+    })
+    color?: {
+        name: { en: string; ar: string };
+        value: string;
+    };
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Brand', required: true })
     brand: Brand;
@@ -57,15 +69,11 @@ export class Product {
     @Prop({ default: 0 })
     reviewCount: number;
 
-
     @Prop({ default: getDefaultImagePath })
     productCardImage: string
 
     @Prop({ default: [] })
     images: Image[];
-
-    @Prop({ type: [{ type: Types.ObjectId, ref: 'Variant' }], default: [] }) 
-    variants: Variant[];
 
     @Prop({ default: false })
     isOutOfStock: boolean;

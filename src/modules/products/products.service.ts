@@ -7,26 +7,32 @@ import { UpdateProductDto } from './dtos/update-product-dto';
 import { GroupsService } from '../groups/groups.service';
 import { User } from '../users/schemas/user.schema';
 
+
+type ProductsFilters = {
+    query?: string;
+    groupId?: string;
+    categoryId?: string;
+    brandId?: string | string[];
+    sortBy?: 'isFeatured' | 'isOnSale' | 'priceUp' | 'priceDown' | 'new';
+    price?: number;
+    priceFrom?: number | string;
+    priceTo?: number | string;
+    onlyParents?: boolean;
+}
+
 @Injectable()
 export class ProductsService {
     constructor(
-        @InjectModel(Variant.name) private variantModel: mongoose.Model<Variant>,
         @InjectModel(Product.name) private productModel: mongoose.Model<Product>,
         @InjectModel(User.name) private userModel: mongoose.Model<User>,
         private groupsService: GroupsService,
     ) { }
 
-    async findAll(filters: {
-        query?: string;
-        groupId?: string;
-        categoryId?: string;
-        brandId?: string | string[];
-        sortBy?: 'isFeatured' | 'isOnSale' | 'priceUp' | 'priceDown' | 'new',
-        price?: number;
-        priceFrom?: number | string;
-        priceTo?: number | string;
-    } = {}): Promise<{ total: number; products: Product[]; limit: number; page: number; appliedFilters: any }> {
-        const { query, groupId, categoryId, sortBy, price, priceFrom, priceTo } = filters;
+    async findAll(
+        filters: ProductsFilters = {},
+        userId?: string
+    ): Promise<{ total: number; products: any[]; limit: number; page: number; appliedFilters: any }> {
+        const { query, groupId, categoryId, sortBy, price, priceFrom, priceTo, onlyParents } = filters;
         let { brandId } = filters;
         const filter: any = {};
 
@@ -166,6 +172,11 @@ export class ProductsService {
         }
 
 
+        // Add onlyParents filter: parentProduct must be null
+        if (onlyParents) {
+            filter.parentProduct = null;
+        }
+
         // Fetch products with sort
         const products = await this.productModel.find(filter)
             .sort(sort)
@@ -183,9 +194,27 @@ export class ProductsService {
                 },
             ]);
 
+        // Determine user's favList
+        let favListIds: Set<string> = new Set();
+        if (userId) {
+            const user = await this.userModel.findById(userId).select('favList');
+            if (user && user.favList && Array.isArray(user.favList)) {
+                favListIds = new Set((user.favList as any[]).map(id => id.toString()));
+            }
+        }
+
+        // Attach isFavourited to each product
+        const productsWithFav = products.map(product => {
+            const prodObj = product.toObject ? product.toObject() : product;
+            return {
+                ...prodObj,
+                isFavourited: favListIds.has(product._id.toString())
+            };
+        });
+
         return {
             total: products.length,
-            products,
+            products: productsWithFav,
             limit: 10,
             page: 1,
             appliedFilters
@@ -194,8 +223,8 @@ export class ProductsService {
 
 
 
-    async getMostSaledProducts(): Promise<Product[]> {
-        return await this.productModel.find({})
+    async getMostSaledProducts(userId?: string): Promise<Product[]> {
+        const products = await this.productModel.find({})
             .populate([
                 'brand',
                 'reviews',
@@ -209,12 +238,31 @@ export class ProductsService {
                     },
                 },
             ]);
+
+
+        let favListIds: Set<string> = new Set();
+        if (userId) {
+            const user = await this.userModel.findById(userId).select('favList');
+            if (user && user.favList && Array.isArray(user.favList)) {
+                favListIds = new Set((user.favList as any[]).map(id => id.toString()));
+            }
+        }
+
+        // Attach isFavourited to each product
+        const productsWithFav = products.map(product => {
+            const prodObj = product.toObject ? product.toObject() : product;
+            return {
+                ...prodObj,
+                isFavourited: favListIds.has(product._id.toString())
+            };
+        });
+
+        return productsWithFav;
     }
 
     async findById(id: string): Promise<Product> {
         const product = await this.productModel.findById(id).populate([
             'brand',
-            'variants',
             'reviews',
             {
                 path: 'group',
@@ -228,8 +276,69 @@ export class ProductsService {
         if (!product) {
             throw new NotFoundException(`Product not found.`);
         }
+
         return product;
     }
+
+
+    async getProductVariants(id: string): Promise<Product[]> {
+        const product = await this.productModel.findById(id).populate([
+            'brand',
+            'reviews',
+            {
+                path: 'group',
+                populate: {
+                    path: 'category',
+                    populate: 'department',
+                },
+            },
+        ]);
+
+        if (!product) {
+            throw new NotFoundException(`Product not found.`);
+        }
+
+        const parentId = product.parentProduct || product._id;
+
+        const colorVariants = await this.productModel.find({
+            $or: [
+                { _id: parentId },
+                { parentProduct: parentId }
+            ]
+        })
+        return colorVariants;
+    }
+
+
+    //  async findVariantsById(id: string): Promise<Product> {
+    //     const product = await this.productModel.findById(id).populate([
+    //         'brand',
+    //         'variants',
+    //         'reviews',
+    //         {
+    //             path: 'group',
+    //             populate: {
+    //                 path: 'category',
+    //                 populate: 'department',
+    //             },
+    //         },
+    //     ]);
+
+    //     if (!product) {
+    //         throw new NotFoundException(`Product not found.`);
+    //     }
+
+    //     const parentId = product.parentProduct || product._id;
+
+    //     const colorVariants = await this.productModel.find({
+    //         $or: [
+    //             { _id: parentId },
+    //             { parentProduct: parentId }
+    //         ]
+    //     })
+
+    //     return product;
+    // }
 
 
 
@@ -258,57 +367,57 @@ export class ProductsService {
         return updatedProduct;
     }
 
-    async addVariantToProduct(productId: string, variant: Variant): Promise<Product> {
-        // 1. Fetch the product and populate variants
-        const product = await this.productModel.findById(productId).populate('variants');
-        if (!product) {
-            throw new NotFoundException('هذا المنتج غير موجود');
-        }
+    // async addVariantToProduct(productId: string, variant: Variant): Promise<Product> {
+    //     // 1. Fetch the product and populate variants
+    //     const product = await this.productModel.findById(productId).populate('variants');
+    //     if (!product) {
+    //         throw new NotFoundException('هذا المنتج غير موجود');
+    //     }
 
-        // 2. Check for duplicate SKU in existing variants
-        const isDuplicate = (product.variants as Variant[]).some((v) => v.sku === variant.sku);
-        if (isDuplicate) {
-            throw new BadRequestException('يوجد متغير بالفعل برمز التخزين الذي قمت بإدخاله');
-        }
+    //     // 2. Check for duplicate SKU in existing variants
+    //     const isDuplicate = (product.variants as Variant[]).some((v) => v.sku === variant.sku);
+    //     if (isDuplicate) {
+    //         throw new BadRequestException('يوجد متغير بالفعل برمز التخزين الذي قمت بإدخاله');
+    //     }
 
-        // 3. Create the new variant
-        const newVariant = await this.variantModel.create(variant);
+    //     // 3. Create the new variant
+    //     const newVariant = await this.variantModel.create(variant);
 
-        // 4. Add the new variant to the product
-        const updatedProduct = await this.productModel.findByIdAndUpdate(
-            productId,
-            { $push: { variants: newVariant._id } },
-            { new: true }
-        ).populate('variants');
+    //     // 4. Add the new variant to the product
+    //     const updatedProduct = await this.productModel.findByIdAndUpdate(
+    //         productId,
+    //         { $push: { variants: newVariant._id } },
+    //         { new: true }
+    //     ).populate('variants');
 
-        if (!updatedProduct) {
-            throw new NotFoundException('لم يتم تحديث المنتج بعد إضافة المتغير');
-        }
+    //     if (!updatedProduct) {
+    //         throw new NotFoundException('لم يتم تحديث المنتج بعد إضافة المتغير');
+    //     }
 
-        return updatedProduct;
-    }
+    //     return updatedProduct;
+    // }
 
-    async deleteVariantFromProduct(productId: string, variantId: string): Promise<Variant> {
-        // 1. Check if the product exists
-        const product = await this.productModel.findById(productId);
-        if (!product) {
-            throw new NotFoundException('المنتج غير موجود');
-        }
+    // async deleteVariantFromProduct(productId: string, variantId: string): Promise<Variant> {
+    //     // 1. Check if the product exists
+    //     const product = await this.productModel.findById(productId);
+    //     if (!product) {
+    //         throw new NotFoundException('المنتج غير موجود');
+    //     }
 
-        // 2. Delete the variant from the Variant collection
-        const deletedVariant = await this.variantModel.findByIdAndDelete(variantId);
-        if (!deletedVariant) {
-            throw new NotFoundException('المتغير غير موجود');
-        }
+    //     // 2. Delete the variant from the Variant collection
+    //     const deletedVariant = await this.variantModel.findByIdAndDelete(variantId);
+    //     if (!deletedVariant) {
+    //         throw new NotFoundException('المتغير غير موجود');
+    //     }
 
-        // 3. Remove the variant ID from the product's variants array
-        await this.productModel.findByIdAndUpdate(
-            productId,
-            { $pull: { variants: variantId } }
-        );
+    //     // 3. Remove the variant ID from the product's variants array
+    //     await this.productModel.findByIdAndUpdate(
+    //         productId,
+    //         { $pull: { variants: variantId } }
+    //     );
 
-        return deletedVariant;
-    }
+    //     return deletedVariant;
+    // }
 
     async findByIds(ids: string[]): Promise<Product[]> {
         const products = await this.productModel.find({ _id: { $in: ids } }).populate([

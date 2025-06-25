@@ -168,7 +168,7 @@ export class AuthService {
             expiresAt: `${accessTokenExpiresAt}`,
         }
     }
-
+ 
     async getCurrentUser(user: any): Promise<User> {
         const { userId } = user
         const currentUser = await this.usersService.findById(userId);

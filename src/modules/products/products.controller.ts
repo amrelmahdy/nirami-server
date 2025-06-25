@@ -13,7 +13,8 @@ export class ProductsController {
 
     @UseGuards(JwtAuthGuard)
     @Get()
-    getAllProducts(
+    async findAll(
+        @Request() req,
         @Query('query') query?: string,
         @Query('groupId') groupId?: string,
         @Query('categoryId') categoryId?: string,
@@ -22,16 +23,21 @@ export class ProductsController {
         @Query('price') price?: number,
         @Query('priceFrom') priceFrom?: number,
         @Query('priceTo') priceTo?: number,
+        @Query('onlyParents') onlyParents?: boolean,
     ): Promise<{ total: number; products: Product[]; limit: number; page: number }> {
-        return this.productService.findAll({ query, groupId, categoryId, brandId, sortBy, price, priceFrom, priceTo });
+        const userId = req.user?.userId;
+        return this.productService.findAll({ query, groupId, categoryId, brandId, sortBy, price, priceFrom, priceTo, onlyParents }, userId);
     }
 
 
 
     @UseGuards(JwtAuthGuard)
     @Get("/most-saled")
-    getMostSaledProducts(@Param("id") id: string): Promise<Product[]> {
-        return this.productService.getMostSaledProducts();
+    getMostSaledProducts(
+        @Request() req,
+        @Param("id") id: string): Promise<Product[]> {
+        const userId = req.user?.userId;
+        return this.productService.getMostSaledProducts(userId);
     }
 
 
@@ -64,6 +70,12 @@ export class ProductsController {
     }
 
     @UseGuards(JwtAuthGuard)
+    @Get(":id/variants")
+    getProductVariants(@Param("id") id: string): Promise<Product[]> {
+        return this.productService.getProductVariants(id);
+    }
+
+    @UseGuards(JwtAuthGuard)
     @Put(':id')
     update(
         @Param('id') id: string,
@@ -72,34 +84,4 @@ export class ProductsController {
         return this.productService.update(id, product);
     }
 
-
-    @UseGuards(JwtAuthGuard)
-    @Post(':id/variant')
-    async addVariant(
-        @Param('id') productId: string,
-        @Body() variantDto: CreateVariantDto
-    ) {
-        return this.productService.addVariantToProduct(productId, variantDto);
-    }
-
-    @UseGuards(JwtAuthGuard)
-    @Delete(':id/variant/:variantId')
-    async deleteVariant(
-        @Param('id') productId: string,
-        @Param('variantId') variantId: string,
-    ) {
-        return this.productService.deleteVariantFromProduct(productId, variantId);
-    }
-
-    //add product to facvorites
-    @UseGuards(JwtAuthGuard)
-    @Post(':id/favourite')
-    async toggleFavourite(
-        @Param('id') productId: string,
-        @Request() req: any
-    ) {
-        //console.log("Adding product to favorites for user:", req.user.userId);
-        const userId = req.user.userId; // Assuming the user ID is stored in the request object
-        return this.productService.toggleFavourite(userId, productId);
-    }
 }

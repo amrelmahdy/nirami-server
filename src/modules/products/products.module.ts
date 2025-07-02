@@ -8,6 +8,7 @@ import { VariantsModule } from '../variants/variants.module';
 import { Variant, variantSchema } from '../variants/schemas/variant.schema';
 import { GroupsModule } from '../groups/groups.module';
 import { User, userSchema } from '../users/schemas/user.schema';
+import { Cart, CartSchema } from '../cart/schemas/cart.schema';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { User, userSchema } from '../users/schemas/user.schema';
       { name: Product.name, schema: productSchema },
       { name: Variant.name, schema: variantSchema },
       { name: User.name, schema: userSchema },
+      { name: Cart.name, schema: CartSchema },
     ]),
     GroupsModule,
     ReviewsModule,

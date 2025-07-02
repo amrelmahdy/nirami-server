@@ -31,6 +31,8 @@ export type PaymentMethod =
     | 'credit_card'
     | 'cash_on_delivery'
     | 'apple_pay'
+    | 'tabby'
+    | 'tamara'
 
 
 

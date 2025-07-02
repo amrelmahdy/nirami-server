@@ -6,6 +6,7 @@ import { Variant } from '../variants/schemas/variant.schema';
 import { UpdateProductDto } from './dtos/update-product-dto';
 import { GroupsService } from '../groups/groups.service';
 import { User } from '../users/schemas/user.schema';
+import { Cart } from '../cart/schemas/cart.schema';
 
 
 type ProductsFilters = {
@@ -25,6 +26,7 @@ export class ProductsService {
     constructor(
         @InjectModel(Product.name) private productModel: mongoose.Model<Product>,
         @InjectModel(User.name) private userModel: mongoose.Model<User>,
+        @InjectModel(Cart.name) private cartModel: mongoose.Model<Cart>,
         private groupsService: GroupsService,
     ) { }
 
@@ -203,18 +205,29 @@ export class ProductsService {
             }
         }
 
-        // Attach isFavourited to each product
-        const productsWithFav = products.map(product => {
+        // Determine user's cart items
+        let cartProductIds: Set<string> = new Set();
+        if (userId) {
+            // Import Cart model here to avoid circular dependency
+            const cart = await this.cartModel.findOne({ user: userId, isOrdered: false }).select('items.product');
+            if (cart && cart.items && Array.isArray(cart.items)) {
+                cartProductIds = new Set(cart.items.map((item: any) => item.product.toString()));
+            }
+        }
+
+        // Attach isFavourited and inCart to each product
+        const productsWithFlags = products.map(product => {
             const prodObj = product.toObject ? product.toObject() : product;
             return {
                 ...prodObj,
-                isFavourited: favListIds.has(product._id.toString())
+                isFavourited: favListIds.has(product._id.toString()),
+                inCart: cartProductIds.has(product._id.toString())
             };
         });
 
         return {
             total: products.length,
-            products: productsWithFav,
+            products: productsWithFlags,
             limit: 10,
             page: 1,
             appliedFilters
@@ -248,16 +261,31 @@ export class ProductsService {
             }
         }
 
+
+
+
+        // Determine user's cart items
+        let cartProductIds: Set<string> = new Set();
+        if (userId) {
+            // Import Cart model here to avoid circular dependency
+            const cart = await this.cartModel.findOne({ user: userId, isOrdered: false }).select('items.product');
+            if (cart && cart.items && Array.isArray(cart.items)) {
+                cartProductIds = new Set(cart.items.map((item: any) => item.product.toString()));
+            }
+        }
+
+
         // Attach isFavourited to each product
-        const productsWithFav = products.map(product => {
+        const productsWithFlags = products.map(product => {
             const prodObj = product.toObject ? product.toObject() : product;
             return {
                 ...prodObj,
-                isFavourited: favListIds.has(product._id.toString())
+                isFavourited: favListIds.has(product._id.toString()),
+                inCart: cartProductIds.has(product._id.toString())
             };
         });
 
-        return productsWithFav;
+        return productsWithFlags;
     }
 
     async findById(id: string): Promise<Product> {
@@ -459,7 +487,6 @@ export class ProductsService {
         const product = await this.productModel.findById(productId)
             .populate([
                 'brand',
-                'variants',
                 'reviews',
                 {
                     path: 'group',

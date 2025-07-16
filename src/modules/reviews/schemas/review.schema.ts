@@ -24,7 +24,7 @@ export class Review {
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
     user: User;
 
-    @Prop({ required: true, min: 1, max: 5 })
+    @Prop({ required: true, min: 0, max: 5 })
     rating: number;
 
     @Prop()

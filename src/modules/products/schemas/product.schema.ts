@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document, Types } from 'mongoose';
 import { getDefaultImagePath } from 'src/config/utils';
 import { Brand } from 'src/modules/brands/schemas/brand.schema';
+import { Review } from 'src/modules/reviews/schemas/review.schema';
 import { Variant } from 'src/modules/variants/schemas/variant.schema';
 import { Image } from 'src/utils/schemas';
 
@@ -17,6 +18,9 @@ export type ProductDocument = Product & Document;
             return ret;
         },
     },
+    toObject: {
+        virtuals: true,
+    }
 })
 
 export class Product {
@@ -63,18 +67,6 @@ export class Product {
     @Prop({ required: true, unique: true })
     sku: string;
 
-    @Prop({ default: 5 })
-    averageRating: number;
-
-    @Prop({ default: 0 })
-    reviewCount: number;
-
-    @Prop({ default: getDefaultImagePath })
-    productCardImage: string
-
-    @Prop({ default: [] })
-    images: Image[];
-
     @Prop({ default: false })
     isOutOfStock: boolean;
 
@@ -86,6 +78,9 @@ export class Product {
 
     @Prop({ default: false })
     isPublished: boolean;
+
+
+    reviews?: Review[];
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
@@ -94,4 +89,14 @@ ProductSchema.virtual('reviews', {
     ref: 'Review',
     localField: '_id',
     foreignField: 'product',
+});
+
+
+
+ProductSchema.virtual('averageRating').get(function () {
+    if (!this.reviews || !Array.isArray(this.reviews) || this.reviews.length === 0) {
+        return 0;
+    }
+    const sum = this.reviews.reduce((acc, review) => acc + (review.rating || 0), 0);
+    return Math.round((sum / this.reviews.length) * 10) / 10;
 });

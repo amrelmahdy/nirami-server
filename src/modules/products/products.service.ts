@@ -186,7 +186,11 @@ export class ProductsService {
             .sort(sort)
             .populate([
                 'brand',
-                'reviews',
+                {
+                    path: 'reviews',
+                    populate: { path: 'user' },
+                    options: { sort: { createdAt: -1 } }
+                },
                 {
                     path: 'group',
                     populate: {
@@ -290,10 +294,71 @@ export class ProductsService {
         return productsWithFlags;
     }
 
+    async getRelatedProducts(productId: string, userId?: string): Promise<Product[]> {
+        const product = await this.productModel.findById(productId).select('group');
+        if (!product || !product.group) {
+            return [];
+        }
+
+        // Find related products in the same group, excluding the current product
+        const relatedProducts = await this.productModel.find({
+            group: product.group,
+            _id: { $ne: productId }
+        })
+        .sort({ createdAt: -1 })
+        .populate([
+            'brand',
+            {
+                path: 'reviews',
+                populate: { path: 'user' },
+                options: { sort: { createdAt: -1 } }
+            },
+            {
+                path: 'group',
+                populate: {
+                    path: 'category',
+                    populate: 'department',
+                },
+            },
+        ]);
+
+        // Determine user's favList
+        let favListIds: Set<string> = new Set();
+        let cartProductIds: Set<string> = new Set();
+        if (userId) {
+            const user = await this.userModel.findById(userId).select('favList');
+            if (user && user.favList && Array.isArray(user.favList)) {
+                favListIds = new Set((user.favList as any[]).map(id => id.toString()));
+            }
+            const cart = await this.cartModel.findOne({ user: userId, isOrdered: false }).select('items.product');
+            if (cart && cart.items && Array.isArray(cart.items)) {
+                cartProductIds = new Set(cart.items.map((item: any) => item.product.toString()));
+            }
+        }
+
+        // Attach isFavourited and inCart to each product
+        return relatedProducts.map(prod => {
+            const prodObj = prod.toObject ? prod.toObject() : prod;
+            return {
+                ...prodObj,
+                isFavourited: favListIds.has(prod._id.toString()),
+                inCart: cartProductIds.has(prod._id.toString())
+            };
+        });
+    }
+
+
+
+
+
     async findById(id: string): Promise<Product> {
         const product = await this.productModel.findById(id).populate([
             'brand',
-            'reviews',
+            {
+                path: 'reviews',
+                populate: { path: 'user' },
+                options: { sort: { createdAt: -1 } }
+            },
             {
                 path: 'group',
                 populate: {
@@ -529,7 +594,7 @@ export class ProductsService {
     }
 
 
-     async makeReviewHelpful(reviewId: string): Promise<Review> {
+    async makeReviewHelpful(reviewId: string): Promise<Review> {
         const updatedReview = await this.reviewsModel.findByIdAndUpdate(
             reviewId,
             { $inc: { helpfulVotes: 1 } },
@@ -540,5 +605,6 @@ export class ProductsService {
         }
         return updatedReview;
     }
+
 }
 

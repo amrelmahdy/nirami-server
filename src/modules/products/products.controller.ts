@@ -42,6 +42,16 @@ export class ProductsController {
         return this.productService.getMostSaledProducts(userId);
     }
 
+    @UseGuards(JwtAuthGuard)
+    @Get("/related/:id")
+    async getRelatedProducts(
+        @Request() req,
+        @Param("id") productId: string): Promise<Product[]> {
+        const userId = req.user?.userId;
+        return this.productService.getRelatedProducts(productId, userId);
+    }
+
+
 
     // @UseGuards(JwtAuthGuard)
     // @Get("favorites")
@@ -99,7 +109,7 @@ export class ProductsController {
         return this.productService.createReview(productId, userId, review);
     }
 
-     // reviews
+    // reviews
     @UseGuards(JwtAuthGuard)
     @Post(':id/reviews/helpful')
     async makeReviewHelpufull(

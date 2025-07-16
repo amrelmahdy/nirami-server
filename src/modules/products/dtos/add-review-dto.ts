@@ -9,7 +9,7 @@ export class AddReviewDto {
 
   @IsNotEmpty()
   @IsNumber()
-  @Min(1)
+  @Min(0)
   @Max(5)
   rating: number;
 

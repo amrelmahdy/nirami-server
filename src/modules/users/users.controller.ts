@@ -7,6 +7,7 @@ import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
 import { CreateUserDto } from './dtos/create-user-dto';
 import { RolesGuard } from './guards/user-roles.guard';
 import { Roles } from './guards/roles.decorator';
+import { UpdateUserDto } from './dtos/update-user-dto';
 
 @UseGuards(RolesGuard)
 @Controller('users')
@@ -34,7 +35,15 @@ export class UsersController {
         return this.userService.findById(id);
     }
 
- 
+   
+    @UseGuards(JwtAuthGuard)
+    //@Roles(UserRole.ADMIN)
+    @Put(":id")
+    async updateUser(@Param("id") id: string, @Body() body: UpdateUserDto): Promise<User> {
+        return this.userService.update(id, body);
+    }
+
+
 
     // @UseGuards(JwtAuthGuard)
     // @Put(":id")

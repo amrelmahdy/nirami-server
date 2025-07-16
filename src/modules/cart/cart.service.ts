@@ -101,9 +101,15 @@ export class CartService {
         } else {
             throw new NotFoundException('Product not found in the cart');
         }
+
+        // If cart is now empty, remove discount
+        if (cart.items.length === 0) {
+            cart.discount = undefined;
+        }
+
+
         await cart.save();
         return cart;
-
     }
 
 
@@ -120,6 +126,8 @@ export class CartService {
 
         // Clear the items in the cart
         cart.items = [];
+        // Remove discount if cart is empty
+        cart.discount = undefined;
 
         await cart.save();
         return cart;
@@ -145,7 +153,7 @@ export class CartService {
         cart.discount = {
             code: discountCode,
             discountType: 'fixed',
-            value: 10,
+            value: 10
         };
 
         // Save to trigger pre('save') and recalculate totals/discounts

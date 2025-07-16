@@ -49,7 +49,7 @@ export class UsersService {
 
     async findById(id: string): Promise<User> {
         const user = await this.usersModel.findById(id)
-            .populate('favList');
+            .populate('favList addresses');
         if (!user) {
             throw new NotFoundException("User not found.");
         }
@@ -72,6 +72,27 @@ export class UsersService {
     // );
     // return updatedUser
     // }
+
+
+    async update(id, body): Promise<User> {
+        const user = await this.usersModel.findById(id);
+        if (!user) {
+            throw new NotFoundException("User not found.");
+        }
+
+        // // If password is provided, hash it
+        // if (body.password) {
+        //     const salt = await bcryptjs.genSalt(10);
+        //     body.password = await bcryptjs.hash(body.password, salt);
+        // }
+
+        // Update the user
+        const updatedUser = await this.usersModel.findByIdAndUpdate(id, body, { new: true });
+        if (!updatedUser) {
+            throw new NotFoundException("User not found.");
+        }
+        return updatedUser;
+    }
 
     async delete(id: string): Promise<User> {
         const user = await this.usersModel.findOneAndDelete({ _id: id });

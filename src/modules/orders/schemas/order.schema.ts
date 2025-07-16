@@ -51,6 +51,9 @@ export type OrderDocument = Order & Document;
 
 
 export class Order {
+    @Prop({ type: String, unique: true, required: false })
+    orderNumber: string;
+
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
     user: mongoose.Schema.Types.ObjectId;
 
@@ -61,9 +64,40 @@ export class Order {
     @Prop({ default: 0 }) // calculated order total price
     totalPrice: number;
 
+    @Prop({ default: 0 }) // calculated order total price
+    finalPrice: number;
+
+    @Prop({
+        type: {
+            code: { type: String },
+            discountType: { type: String, enum: ['percentage', 'fixed'] },
+            value: { type: Number }
+        },
+        _id: false // to prevent an _id field for the discount subdocument
+    })
+    discount?: {
+        code: string;
+        discountType: 'percentage' | 'fixed';
+        value: number;
+    };
+
     // payment method
-    @Prop({ type: String, enum: ['credit_card', 'cash_on_delivery', 'apple_pay'], default: 'cash_on_delivery' })
+    @Prop({ type: String, enum: ['credit_card', 'cash_on_delivery', 'apple_pay', 'tabby', 'tamara'], default: 'cash_on_delivery' })
     paymentMethod: PaymentMethod;
+
+
+    @Prop({ default: 0 }) // cost of shipping
+    shippingCost: number;
+
+    @Prop({ default: 'unpaid' }) // total - discount + shipping
+    paymentStatus?: 'paid' | 'unpaid' | 'refunded';
+
+    @Prop()
+    paymentReference?: string; // Transaction ID from payment gateway
+
+
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Address', required: true })
+    shippingAddress: mongoose.Schema.Types.ObjectId;
 
     // status of the order
     @Prop({
@@ -99,3 +133,12 @@ export const OrderSchema = SchemaFactory.createForClass(Order);
 
 
 
+OrderSchema.pre<Order>('save', async function (next) {
+    if (!this.orderNumber) {
+        // You can use a timestamp + random digits or an incremental counter
+        const timestamp = Date.now().toString().slice(-6); // last 6 digits of timestamp
+        const random = Math.floor(1000 + Math.random() * 9000); // 4-digit random number
+        this.orderNumber = `ORD-${timestamp}${random}`;
+    }
+    next();
+});

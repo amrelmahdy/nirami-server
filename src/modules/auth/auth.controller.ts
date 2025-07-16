@@ -31,6 +31,7 @@ export class AuthController {
     async getUser(@Request() req: any): Promise<User> {
         return this.authService.getCurrentUser(req.user);
     }
+    
 
     @UseGuards(RefreshTokenJwtAuthGuard)
     @Post("refresh")
@@ -55,15 +56,16 @@ export class AuthController {
         return this.authService.verifyOtp(body.phoneOrEmail, body.otp);
     }
 
-    @Post("otp-register")
-    async register(@Body() body: LoginRegisterWithOtpDto): Promise<any> {
-        return this.authService.register(body)
-    }
+    // @Post("otp-register")
+    // @UseGuards(OtpAuthGuard)
+    // async register(@Request() req) {
+    //     return this.authService.register(req.body)
+    // }
 
     @Post('otp-login')
     @UseGuards(OtpAuthGuard)
     async loginWithOtp(@Request() req) {
-        return this.authService.loginWithOtp(req.user); // Returns JWT or session token
+        return this.authService.loginWithOtp(req.body); // Returns JWT or session token
     }
 
 

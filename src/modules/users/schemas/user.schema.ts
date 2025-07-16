@@ -57,14 +57,29 @@ export class User {
     @Prop({ default: false })
     isProfileCompleted: boolean;
 
-    @Prop({ enum: Gender, default: Gender.UNKNOWN })
-    gender: Gender;
+  
 
     @Prop({ enum: UserRole, default: UserRole.USER })
     role: UserRole;
 
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }], default: [] })
     favList: Product[]
+
+    // add date of birth
+    @Prop({ required: false })
+    dateOfBirth: Date;
+
+    // @Prop({ type: String, enum: Object              
+    //     values: Object.values   
+
+
+    @Prop({ type: String, enum: Object.values(Gender), default : "unknown" })
+    gender: Gender
+                    
+
+    /// gender
+    // @Prop({ type: String, enum: Object       
+    
 
     // @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Address' }], default: [] })
     // addresses: Address[]
@@ -106,11 +121,18 @@ export class User {
 }
 
 
-export const userSchema = SchemaFactory.createForClass(User);
+export const UserSchema = SchemaFactory.createForClass(User);
 
+
+
+UserSchema.virtual('addresses', {
+    ref: 'Address',
+    localField: '_id',
+    foreignField: 'user',
+});
 
 // Add custom validation: either email or phone is required
-userSchema.pre('validate', function (next) {
+UserSchema.pre('validate', function (next) {
   if (!this.email && !this.phone) {
     return next(new Error('Either email or phone is required.'));
   }

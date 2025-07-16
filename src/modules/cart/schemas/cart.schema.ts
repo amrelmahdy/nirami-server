@@ -36,7 +36,6 @@ export class Cart {
     code: string;
     discountType: 'percentage' | 'fixed';
     value: number;
-    amount: number;
   };
 
   @Prop({ default: 0 }) // calculated total
@@ -71,6 +70,13 @@ CartSchema.pre('save', function (next) {
       return sum + (item.quantity || 0) * unitPrice;
     }, 0)
     : 0;
+
+  // Calculate shipping cost: free if totalPrice >= 500, else 25
+  if (this.totalPrice >= 500) {
+    this.shippingCost = 0;
+  } else {
+    this.shippingCost = 25;
+  }
 
   let discountAmount = 0;
 

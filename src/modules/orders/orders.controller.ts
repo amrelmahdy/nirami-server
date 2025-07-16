@@ -1,9 +1,10 @@
-import { Controller, Get, NotFoundException, Param, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Param, Post, Request, UseGuards } from '@nestjs/common';
 import { CartService } from '../cart/cart.service';
 import { Cart } from '../cart/schemas/cart.schema';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Order } from './schemas/order.schema';
 import { OrdersService } from './orders.service';
+import { CreateOrderDto } from './dtos/create-order-dto';
 
 @Controller('orders')
 export class OrderController {
@@ -20,19 +21,24 @@ export class OrderController {
         return this.orderService.getOrderHistory(userId);
     }
 
-    @UseGuards(JwtAuthGuard)
+    // @UseGuards(JwtAuthGuard)
+    // async checkout(@Request() req): Promise<Order> {
     @Post('checkout')
-    async checkout(@Request() req): Promise<Order> {
+    @UseGuards(JwtAuthGuard)
+    async checkout(
+        @Request() req,
+        @Body() order: CreateOrderDto
+    ): Promise<any> {
         const userId = req.user?.userId;
         if (!userId) {
             throw new NotFoundException('User ID is required to checkout');
         }
-        return this.orderService.checkout(userId);
+        return this.orderService.checkout(userId, order);
     }
 
 
     @UseGuards(JwtAuthGuard)
-    @Post('details/:orderId')
+    @Get(':orderId')
     async getOrderDetails(@Request() req, @Param('orderId') orderId:
         string): Promise<Order> {
         const userId = req.user?.userId;

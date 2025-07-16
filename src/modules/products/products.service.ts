@@ -7,6 +7,7 @@ import { UpdateProductDto } from './dtos/update-product-dto';
 import { GroupsService } from '../groups/groups.service';
 import { User } from '../users/schemas/user.schema';
 import { Cart } from '../cart/schemas/cart.schema';
+import { Review } from '../reviews/schemas/review.schema';
 
 
 type ProductsFilters = {
@@ -27,6 +28,7 @@ export class ProductsService {
         @InjectModel(Product.name) private productModel: mongoose.Model<Product>,
         @InjectModel(User.name) private userModel: mongoose.Model<User>,
         @InjectModel(Cart.name) private cartModel: mongoose.Model<Cart>,
+        @InjectModel(Review.name) private reviewsModel: mongoose.Model<Review>,
         private groupsService: GroupsService,
     ) { }
 
@@ -500,6 +502,43 @@ export class ProductsService {
             throw new NotFoundException('Product not found');
         }
         return product as Product;
+    }
+
+
+    async createReview(productId: string, userId: string, review: any): Promise<Review> {
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        const product = await this.productModel.findById(productId);
+        if (!product) {
+            throw new NotFoundException('Product not found');
+        }
+
+        // Create the review
+        const newReview = {
+            ...review,
+            product: productId,
+            user: userId,
+        };
+
+        const createdReview = await this.reviewsModel.create(newReview);
+
+        return createdReview;
+    }
+
+
+     async makeReviewHelpful(reviewId: string): Promise<Review> {
+        const updatedReview = await this.reviewsModel.findByIdAndUpdate(
+            reviewId,
+            { $inc: { helpfulVotes: 1 } },
+            { new: true }
+        );
+        if (!updatedReview) {
+            throw new NotFoundException('Review not found');
+        }
+        return updatedReview;
     }
 }
 

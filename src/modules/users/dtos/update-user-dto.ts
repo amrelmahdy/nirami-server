@@ -1,31 +1,26 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional } from "class-validator";
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { Gender, UserRole } from "../schemas/user.schema";
 import { Product } from "src/modules/products/schemas/product.schema";
 // import { Address } from "src/addresses/schemas/address.schema";
 // import { Product } from "src/products/schemas/product.schema";
 
-export class CreateUserDto {
-    @IsNotEmpty()
+export class UpdateUserDto {
+    @IsOptional()
     firstName: string;
 
-    @IsNotEmpty()
+    @IsOptional()
     lastName: string;
 
     @IsEmail()
-    @IsNotEmpty()
+    @IsOptional()
     email: string;
 
-    @IsNotEmpty()
-    password: string;
-
-    @IsNotEmpty()
+    @IsString()
+    @IsOptional()
     phone: string;
 
     @IsOptional()
     isProfileCompleted: boolean;
-
-    @IsOptional()
-    dateOfBirth: Date;
 
     @IsEnum(UserRole)
     @IsOptional()
@@ -37,6 +32,10 @@ export class CreateUserDto {
 
     @IsOptional()
     image: string;
+
+
+    @IsOptional()
+    dateOfBirth: Date;
 
     @IsOptional()
     favList: Product[]

@@ -25,13 +25,6 @@ export class OtpStrategy extends PassportStrategy(Strategy, 'otp') {
     if (!verification.success) {
       throw new UnauthorizedException(verification.message);
     }
-
-    const user = await this.usersService.findByEmailOrPhone(phoneOrEmail, phoneOrEmail);
-
-    if (!user) {
-      throw new UnauthorizedException('User not found');
-    }
-
-    return user;
+    return true;
   }
 }

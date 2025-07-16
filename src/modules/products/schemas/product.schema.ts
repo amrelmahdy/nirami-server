@@ -88,9 +88,9 @@ export class Product {
     isPublished: boolean;
 }
 
-export const productSchema = SchemaFactory.createForClass(Product);
+export const ProductSchema = SchemaFactory.createForClass(Product);
 
-productSchema.virtual('reviews', {
+ProductSchema.virtual('reviews', {
     ref: 'Review',
     localField: '_id',
     foreignField: 'product',

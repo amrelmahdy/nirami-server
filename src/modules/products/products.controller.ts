@@ -5,6 +5,8 @@ import { CreateProductDto } from './dtos/create-product-dto';
 import { CreateVariantDto } from '../variants/dtos/create-variant-dto';
 import { UpdateProductDto } from './dtos/update-product-dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AddReviewDto } from './dtos/add-review-dto';
+import { Review } from '../reviews/schemas/review.schema';
 
 
 @Controller('products')
@@ -33,7 +35,7 @@ export class ProductsController {
 
     @UseGuards(JwtAuthGuard)
     @Get("/most-saled")
-    getMostSaledProducts(
+    async getMostSaledProducts(
         @Request() req,
         @Param("id") id: string): Promise<Product[]> {
         const userId = req.user?.userId;
@@ -58,30 +60,53 @@ export class ProductsController {
 
     @UseGuards(JwtAuthGuard)
     @Post()
-    createProduct(@Body() product: CreateProductDto): Promise<Product> {
+    async createProduct(@Body() product: CreateProductDto): Promise<Product> {
         return this.productService.create(product);
     }
 
 
     @UseGuards(JwtAuthGuard)
     @Get(":id")
-    findProductById(@Param("id") id: string): Promise<Product> {
+    async findProductById(@Param("id") id: string): Promise<Product> {
         return this.productService.findById(id);
     }
 
     @UseGuards(JwtAuthGuard)
     @Get(":id/variants")
-    getProductVariants(@Param("id") id: string): Promise<Product[]> {
+    async getProductVariants(@Param("id") id: string): Promise<Product[]> {
         return this.productService.getProductVariants(id);
     }
 
     @UseGuards(JwtAuthGuard)
     @Put(':id')
-    update(
+    async update(
         @Param('id') id: string,
         @Body() product: UpdateProductDto
     ): Promise<Product> {
         return this.productService.update(id, product);
+    }
+
+
+    // reviews
+    @UseGuards(JwtAuthGuard)
+    @Post(':id/reviews')
+    async createReview(
+        @Request() req,
+        @Param('id') productId: string,
+        @Body() review: AddReviewDto
+    ): Promise<Review> {
+        const userId = req.user?.userId;
+        return this.productService.createReview(productId, userId, review);
+    }
+
+     // reviews
+    @UseGuards(JwtAuthGuard)
+    @Post(':id/reviews/helpful')
+    async makeReviewHelpufull(
+        @Request() req,
+        @Param('id') reviewId: string,
+    ): Promise<Review> {
+        return this.productService.makeReviewHelpful(reviewId);
     }
 
 }

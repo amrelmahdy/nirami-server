@@ -53,8 +53,39 @@ export class AuthService {
         console.log("Logging out user:", user);
     }
 
-    async loginWithOtp(user: User) {
+    async loginWithOtp(body: { phoneOrEmail: string }) {
+
         const now = Date.now()
+        const { phoneOrEmail } = body;
+
+        const userExists = await this.usersService.findByEmailOrPhone(phoneOrEmail, phoneOrEmail);
+        let user: User;
+
+        if (userExists) { // login with existing user 
+            user = userExists;
+        } else { // register new user
+            // Validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            // Saudi phone: starts with 05, 5, or +9665, and 8 digits after
+            const saPhoneRegex = /^(?:\+9665|05|5)[0-9]{8}$/;
+
+            const isEmail = emailRegex.test(phoneOrEmail);
+            const isPhone = saPhoneRegex.test(phoneOrEmail);
+
+            const email = isEmail ? phoneOrEmail : null;
+            const phone = isPhone ? phoneOrEmail : null;
+
+            if (!isEmail && !isPhone) {
+                throw new BadRequestException("Input must be a valid email or Saudi phone number.");
+            }
+
+            const newUser: any = {}
+
+            if (email) newUser.email = email.toLowerCase().trim();
+            if (phone) newUser.phone = phone.trim();
+
+            user = await this.usersService.register(newUser);
+        }
 
         const userId = (user as any)._id
 
@@ -88,67 +119,67 @@ export class AuthService {
 
 
 
-    async register(body: { phoneOrEmail: string }): Promise<any> {
-        const now = Date.now()
-        const { phoneOrEmail } = body;
-        console.log("phoneOrEmailphoneOrEmailphoneOrEmailphoneOrEmail", phoneOrEmail)
+    // async register(body: { phoneOrEmail: string }): Promise<any> {
+    //     const now = Date.now()
+    //     const { phoneOrEmail } = body;
+    //     console.log("phoneOrEmailphoneOrEmailphoneOrEmailphoneOrEmail", phoneOrEmail)
 
-        const userIsTaken = await this.usersService.findByEmailOrPhone(phoneOrEmail, phoneOrEmail)
-        if (userIsTaken) {
-            throw new BadRequestException("User has already been taken.")
-        }
+    //     const userIsTaken = await this.usersService.findByEmailOrPhone(phoneOrEmail, phoneOrEmail)
+    //     if (userIsTaken) {
+    //         throw new BadRequestException("User has already been taken.")
+    //     }
 
-        // Validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        // Saudi phone: starts with 05, 5, or +9665, and 8 digits after
-        const saPhoneRegex = /^(?:\+9665|05|5)[0-9]{8}$/;
+    //     // Validation
+    //     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    //     // Saudi phone: starts with 05, 5, or +9665, and 8 digits after
+    //     const saPhoneRegex = /^(?:\+9665|05|5)[0-9]{8}$/;
 
-        const isEmail = emailRegex.test(phoneOrEmail);
-        const isPhone = saPhoneRegex.test(phoneOrEmail);
+    //     const isEmail = emailRegex.test(phoneOrEmail);
+    //     const isPhone = saPhoneRegex.test(phoneOrEmail);
 
-        const email = isEmail ? phoneOrEmail : null;
-        const phone = isPhone ? phoneOrEmail : null;
+    //     const email = isEmail ? phoneOrEmail : null;
+    //     const phone = isPhone ? phoneOrEmail : null;
 
-        if (!isEmail && !isPhone) {
-            throw new BadRequestException("Input must be a valid email or Saudi phone number.");
-        }
+    //     if (!isEmail && !isPhone) {
+    //         throw new BadRequestException("Input must be a valid email or Saudi phone number.");
+    //     }
 
-        const newUser: any = {}
+    //     const newUser: any = {}
 
-        if (email) newUser.email = email.toLowerCase().trim();
-        if (phone) newUser.phone = phone.trim();
+    //     if (email) newUser.email = email.toLowerCase().trim();
+    //     if (phone) newUser.phone = phone.trim();
 
 
-        const user = await this.usersService.register(newUser);
+    //     const user = await this.usersService.register(newUser);
 
-        const userId = (user as any).id
+    //     const userId = (user as any).id
 
-        const payload = {
-            userId: userId,
-            username: user.email || user.phone,
-            sub: {
-                firstNname: user.firstName,
-                lastNname: user.lastName,
-                phone: user.phone,
-                email: user.email
-            }
-        };
-        // Calculate expiration time for access token (1 day)
-        const accessTokenExpiresAt = now + (86400 * 1000); // 86400 seconds * 1000 milliseconds/second
-        // Calculate expiration time for refresh token (7 days)
-        const refreshTokenExpiresAt = now + (7 * 24 * 60 * 60 * 1000); // 7 days * 24 hours/day * 60 minutes/hour * 60 seconds/minute * 1000 milliseconds/second
+    //     const payload = {
+    //         userId: userId,
+    //         username: user.email || user.phone,
+    //         sub: {
+    //             firstNname: user.firstName,
+    //             lastNname: user.lastName,
+    //             phone: user.phone,
+    //             email: user.email
+    //         }
+    //     };
+    //     // Calculate expiration time for access token (1 day)
+    //     const accessTokenExpiresAt = now + (86400 * 1000); // 86400 seconds * 1000 milliseconds/second
+    //     // Calculate expiration time for refresh token (7 days)
+    //     const refreshTokenExpiresAt = now + (7 * 24 * 60 * 60 * 1000); // 7 days * 24 hours/day * 60 minutes/hour * 60 seconds/minute * 1000 milliseconds/second
 
-        return {
-            accessToken: this.jwtService.sign(payload, { expiresIn: '86400s' }),
-            refreshToken: this.jwtService.sign(payload, { expiresIn: '7d' }),
-            tokenType: "Bearer",
-            expiresIn: "86400",
-            expiresAt: `${accessTokenExpiresAt}`,
-            refreshExpiresIn: "604800",
-            refreshExpiresAt: `${refreshTokenExpiresAt}`,
-            userInfo: user
-        }
-    }
+    //     return {
+    //         accessToken: this.jwtService.sign(payload, { expiresIn: '86400s' }),
+    //         refreshToken: this.jwtService.sign(payload, { expiresIn: '7d' }),
+    //         tokenType: "Bearer",
+    //         expiresIn: "86400",
+    //         expiresAt: `${accessTokenExpiresAt}`,
+    //         refreshExpiresIn: "604800",
+    //         refreshExpiresAt: `${refreshTokenExpiresAt}`,
+    //         userInfo: user
+    //     }
+    // }
 
     refreshToken(currentUser: any): any {
         const now = Date.now()
@@ -168,7 +199,7 @@ export class AuthService {
             expiresAt: `${accessTokenExpiresAt}`,
         }
     }
- 
+
     async getCurrentUser(user: any): Promise<User> {
         const { userId } = user
         const currentUser = await this.usersService.findById(userId);
@@ -195,18 +226,18 @@ export class AuthService {
 
         const { phoneOrEmail } = body
 
-        const user = await this.usersService.findByEmailOrPhone(phoneOrEmail, phoneOrEmail);
+        //const user = await this.usersService.findByEmailOrPhone(phoneOrEmail, phoneOrEmail);
 
-        if (!user) {
-            throw new BadRequestException({ code: 'user_not_found', message: 'User not found' });
-        }
+        // if (!user) {
+        //     throw new BadRequestException({ code: 'user_not_found', message: 'User not found' });
+        // }
 
-        const lockKey = `otp:${phoneOrEmail}`;
-        const isLocked = await this.cacheService.getValue(lockKey);
+        // const lockKey = `otp:${phoneOrEmail}`;
+        // const isLocked = await this.cacheService.getValue(lockKey);
 
-        if (isLocked) {
-            throw new BadRequestException('Please wait before requesting a new OTP');
-        }
+        // if (isLocked) {
+        //     throw new BadRequestException('Please wait before requesting a new OTP');
+        // }
 
         const otp = await this.generateOtp(phoneOrEmail);
         // TODO: send otp via email or phone 

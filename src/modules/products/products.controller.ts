@@ -97,6 +97,16 @@ export class ProductsController {
     }
 
 
+    @UseGuards(JwtAuthGuard)
+    @Post(':id/favourite')
+    async toggleFavouriteProduct(
+        @Request() req,
+        @Param('id') productId: string,
+    ): Promise<Product> {
+        const userId = req.user?.userId;
+        return this.productService.toggleFavourite(userId, productId);
+    }
+
     // reviews
     @UseGuards(JwtAuthGuard)
     @Post(':id/reviews')
@@ -108,6 +118,8 @@ export class ProductsController {
         const userId = req.user?.userId;
         return this.productService.createReview(productId, userId, review);
     }
+
+    
 
     // reviews
     @UseGuards(JwtAuthGuard)

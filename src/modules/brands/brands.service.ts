@@ -29,10 +29,19 @@ export class BrandsService {
     }
 
     async findById(id: string): Promise<Brand> {
-        const vendor = await this.brandModel.findById(id);
-        if (!vendor) {
+        const brand = await this.brandModel.findById(id);
+        if (!brand) {
             throw new NotFoundException("Brand not found");
         }
-        return vendor;
+        return brand;
+    }
+
+
+    async update(id: string, brand: Brand): Promise<Brand> {
+        const updatedBrand = await this.brandModel.findByIdAndUpdate(id, brand, { new: true });
+        if (!updatedBrand) {
+            throw new NotFoundException("Brand not found");
+        }
+        return updatedBrand;                
     }
 }

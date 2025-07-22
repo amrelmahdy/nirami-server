@@ -119,8 +119,6 @@ export class ProductsController {
         return this.productService.createReview(productId, userId, review);
     }
 
-    
-
     // reviews
     @UseGuards(JwtAuthGuard)
     @Post(':id/reviews/helpful')

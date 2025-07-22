@@ -3,7 +3,6 @@ import mongoose, { Document, Types } from 'mongoose';
 import { getDefaultImagePath } from 'src/config/utils';
 import { Brand } from 'src/modules/brands/schemas/brand.schema';
 import { Review } from 'src/modules/reviews/schemas/review.schema';
-import { Variant } from 'src/modules/variants/schemas/variant.schema';
 import { Image } from 'src/utils/schemas';
 
 export type ProductDocument = Product & Document;
@@ -79,6 +78,12 @@ export class Product {
     @Prop({ default: false })
     isPublished: boolean;
 
+
+    @Prop({ default: getDefaultImagePath })
+    productCardImage?: string;
+
+    @Prop({ default: [] })
+    images?: Image[];
 
     reviews?: Review[];
 }

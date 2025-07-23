@@ -20,6 +20,7 @@ import { RedisModule } from '@nestjs-modules/ioredis';
 import { CartModule } from '../cart/cart.module';
 import { AddressesModule } from '../addresses/addresses.module';
 import { OrdersModule } from '../orders/order.module';
+import { TicketsModule } from '../tickets/tickets.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -56,7 +57,8 @@ import { OrdersModule } from '../orders/order.module';
     UsersModule,
     CartModule,
     AddressesModule,
-    OrdersModule
+    OrdersModule,
+    TicketsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -2,6 +2,10 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { Order } from 'src/modules/orders/schemas/order.schema';
 
+
+
+export type TicketType = 'complain' | 'query' | 'return';
+
 @Schema({
     timestamps: true,
     toJSON: {
@@ -23,13 +27,20 @@ export class Ticket {
     name: string;
 
     @Prop({ required: true })
-    email: number;
+    email: string;
 
     @Prop({ required: true })
     phone: string;
 
-    @Prop({ default: 'unpaid' }) // total - discount + shipping
-    type?: 'complain' | 'query' | 'return';
+    @Prop({
+        type: String,
+        enum: [
+            'complain',
+            'query',
+            'return'
+        ], default: 'return'
+    })
+    type?: TicketType;
 
     @Prop({ required: true })
     message: string;

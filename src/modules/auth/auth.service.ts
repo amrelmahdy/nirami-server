@@ -1,8 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/modules/users/schemas/user.schema';
 import { UsersService } from 'src/modules/users/users.service';
 import { CacheService } from '../cache/cache.service';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 
 const bcryptjs = require('bcryptjs')
 
@@ -11,7 +13,8 @@ export class AuthService {
     constructor(
         private usersService: UsersService,
         private jwtService: JwtService,
-        private cacheService: CacheService
+        private cacheService: CacheService,
+        private readonly httpService: HttpService
     ) { }
 
 
@@ -223,8 +226,34 @@ export class AuthService {
 
 
     async sendOtp(body: { phoneOrEmail: string }): Promise<any> {
-
         const { phoneOrEmail } = body
+        try {
+            const otpResponse = await firstValueFrom(
+                this.httpService.post('https://www.msegat.com/gw/sendOTPCode.php', {
+                    lang: 'En',
+                    userName: 'Sultanqd1011',
+                    number: phoneOrEmail, // Use the input here if dynamic
+                    userSender: 'Nirami',
+                    apiKey: 'E71453A252F15D98BD8907E0B9FC9042',
+                }),
+            );
+
+            return otpResponse.data;
+        } catch (error) {
+            throw new InternalServerErrorException('Failed to send OTP');
+        }
+        // const otp = await this.httpService.post('https://www.msegat.com/gw/sendOTPCode.php',
+        //     {
+        //         "lang": "En",
+        //         "userName": "Sultanqd1011",
+        //         "number": "101003939110",
+        //         "userSender": "Nirami",
+        //         "apiKey": "E71453A252F15D98BD8907E0B9FC9042"
+
+        //     }
+        // );
+
+        // console.log("otp", otp);
 
         //const user = await this.usersService.findByEmailOrPhone(phoneOrEmail, phoneOrEmail);
 
@@ -239,13 +268,13 @@ export class AuthService {
         //     throw new BadRequestException('Please wait before requesting a new OTP');
         // }
 
-        const otp = await this.generateOtp(phoneOrEmail);
-        // TODO: send otp via email or phone 
-        return {
-            success: true,
-            otp,
-            message: 'OTP sent successfully',
-        };
+        // const otp = await this.generateOtp(phoneOrEmail);
+        // // TODO: send otp via email or phone 
+        // return {
+        //     success: true,
+        //     otp,
+        //     message: 'OTP sent successfully',
+        // };
     }
 
 

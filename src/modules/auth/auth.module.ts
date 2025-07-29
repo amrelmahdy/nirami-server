@@ -10,10 +10,12 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { CacheModule } from '../cache/cache.module';
 import { OtpStrategy } from './strategies/otp.strategy';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
     imports: [
         UsersModule,
+        HttpModule,
         CacheModule,
         PassportModule,
         JwtModule.registerAsync({

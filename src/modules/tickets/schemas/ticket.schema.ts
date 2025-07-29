@@ -6,6 +6,15 @@ import { Order } from 'src/modules/orders/schemas/order.schema';
 
 export type TicketType = 'complain' | 'query' | 'return';
 
+
+export type TicketStatus =
+    | 'pending'
+    | 'processing'
+    | 'completed'
+    | 'cancelled'
+    | 'returned';
+
+
 @Schema({
     timestamps: true,
     toJSON: {
@@ -20,8 +29,9 @@ export type TicketType = 'complain' | 'query' | 'return';
 
 @Schema({ timestamps: true })
 export class Ticket {
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true })
-    order: Order;
+
+    @Prop({ type: String, required: false })
+    orderNumber: string;
 
     @Prop({ required: true })
     name: string;
@@ -44,6 +54,21 @@ export class Ticket {
 
     @Prop({ required: true })
     message: string;
+
+    // status of the order
+    @Prop({
+        type: String, enum: [
+            'pending',
+            'processing',
+            'completed',
+            'cancelled',
+            'returned',
+        ], default: 'pending'
+    })
+    status: TicketStatus;
+
+    @Prop({ required: false })
+    comment: string;
 }
 
 export const TicketSchema = SchemaFactory.createForClass(Ticket);

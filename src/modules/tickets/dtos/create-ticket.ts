@@ -4,7 +4,7 @@ import { Order } from 'src/modules/orders/schemas/order.schema';
 
 export class CreateTicketDto {
     @IsNotEmpty()
-    order: Order;
+    orderNumber: string;
 
     @IsNotEmpty()
     @IsString()
@@ -26,4 +26,28 @@ export class CreateTicketDto {
     @IsNotEmpty()
     @IsString()
     message: string;
+
+    @IsOptional()
+    @IsEnum([
+        'pending',
+        'processing',
+        'completed',
+        'cancelled',
+        'returned'
+    ])
+
+
+    @IsNotEmpty()
+    @IsEnum([
+        'pending',
+        'processing',
+        'completed',
+        'cancelled',
+        'returned'
+    ])
+    status: 'pending' | 'processing' | 'completed' | 'cancelled' | 'returned';
+
+    @IsOptional()
+    @IsString()
+    comment: string;
 }

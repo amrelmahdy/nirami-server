@@ -8,21 +8,22 @@ import { UsersService } from 'src/modules/users/users.service';
 export class OtpStrategy extends PassportStrategy(Strategy, 'otp') {
   constructor(
     private readonly authService: AuthService,
+
     private readonly usersService: UsersService
   ) {
     super();
   }
 
   async validate(req: Request): Promise<any> {
-    const { phoneOrEmail, otp } = (req as any).body;
+    const { otpId, code } = (req as any).body;
 
-    if (!phoneOrEmail || !otp) {
+    if (!otpId || !code) {
       throw new UnauthorizedException('phone or email and OTP are required');
     }
 
-    const verification = await this.authService.verifyOtp(phoneOrEmail, otp);
+    const verification = await this.authService.verifyOtp(otpId, code);
 
-    if (!verification.success) {
+    if (verification.message !== "Success") {
       throw new UnauthorizedException(verification.message);
     }
     return true;

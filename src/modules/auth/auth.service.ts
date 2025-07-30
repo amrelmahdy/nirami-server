@@ -278,34 +278,28 @@ export class AuthService {
     }
 
 
-    async verifyOtp(emailOrPhone: string, otp: string): Promise<{ success: boolean; message: string }> {
-
-
-        const key = `otp:${emailOrPhone}`;
-        const storedOtp = await this.cacheService.getValue(key);
-
-
-        if (!storedOtp) {
-            return {
-                success: false,
-                message: 'OTP has expired or was not requested',
-            };
+    async verifyOtp(otpId, code): Promise<{
+        "code": string,
+        "message": string,
+        "result": string | null
+    }> {
+        try {
+            const verifyOtpResponse = await firstValueFrom(
+                this.httpService.post(' https://www.msegat.com/gw/verifyOTPCode.php',
+                    {
+                        "lang": "En",
+                        "userName": "Sultanqd1011",
+                        "userSender": "Nirami",
+                        "apiKey": "E71453A252F15D98BD8907E0B9FC9042",
+                        "code": code,
+                        "id": otpId
+                    }
+                ),
+            );
+            return verifyOtpResponse.data;
+        } catch (error) {
+            throw new InternalServerErrorException('Failed to send OTP');
         }
-
-        if (storedOtp.toString() !== otp) {
-            return {
-                success: false,
-                message: 'Invalid OTP',
-            };
-        }
-
-        // Valid OTP — delete from Redis to enforce one-time use
-        await this.cacheService.deleteValue(key);
-
-        return {
-            success: true,
-            message: 'OTP verified successfully',
-        };
     }
 
 

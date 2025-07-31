@@ -30,6 +30,11 @@ export type TicketStatus =
 @Schema({ timestamps: true })
 export class Ticket {
 
+
+    @Prop({ type: String, unique: true, required: false })
+    ticketNumber?: string;
+
+
     @Prop({ type: String, required: false })
     orderNumber: string;
 
@@ -73,3 +78,14 @@ export class Ticket {
 
 export const TicketSchema = SchemaFactory.createForClass(Ticket);
 
+
+
+TicketSchema.pre<Ticket>('save', async function (next) {
+    if (!this.ticketNumber) {
+        // You can use a timestamp + random digits or an incremental counter
+        const timestamp = Date.now().toString().slice(-6); // last 6 digits of timestamp
+        const random = Math.floor(1000 + Math.random() * 9000); // 4-digit random number
+        this.ticketNumber = `${timestamp}${random}`;
+    }
+    next();
+});

@@ -1,5 +1,5 @@
 import { Controller, Post, Body, Get, Patch, Param, BadRequestException } from '@nestjs/common';
-import { CreateTicketDto } from './dtos/create-ticket';
+import { CreateTicketDto } from './dtos/create-ticket-dto';
 import { TicketsService } from './tickets.service';
 import { Ticket } from './schemas/ticket.schema';
 

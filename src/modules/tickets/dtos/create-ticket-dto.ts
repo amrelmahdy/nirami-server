@@ -1,6 +1,4 @@
 import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { Order } from 'src/modules/orders/schemas/order.schema';
-
 
 export class CreateTicketDto {
     @IsNotEmpty()

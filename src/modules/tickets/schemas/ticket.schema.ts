@@ -4,7 +4,7 @@ import { Order } from 'src/modules/orders/schemas/order.schema';
 
 
 
-export type TicketType = 'complain' | 'query' | 'return';
+export type TicketType = 'complain' | 'inquiry' | 'return_or_exchange';
 
 
 export type TicketStatus =
@@ -51,8 +51,8 @@ export class Ticket {
         type: String,
         enum: [
             'complain',
-            'query',
-            'return'
+            'inquiry',
+            'return_or_exchange'
         ], default: 'return'
     })
     type?: TicketType;

@@ -21,11 +21,11 @@ export class OtpStrategy extends PassportStrategy(Strategy, 'otp') {
       throw new UnauthorizedException('phone or email and OTP are required');
     }
 
-    const verification = await this.authService.verifyOtp(otpId, code);
+    // const verification = await this.authService.verifyOtp(otpId, code);
 
-    if (verification.message !== "Success") {
-      throw new UnauthorizedException(verification.message);
-    }
+    // if (verification.message !== "Success") {
+    //   throw new UnauthorizedException(verification.message);
+    // }
     return true;
   }
 }

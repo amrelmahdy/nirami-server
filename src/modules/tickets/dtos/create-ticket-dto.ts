@@ -18,8 +18,8 @@ export class CreateTicketDto {
     phone: string;
 
     @IsNotEmpty()
-    @IsEnum(['complain', 'query', 'return'])
-    type?: 'complain' | 'query' | 'return';
+    @IsEnum(['complaint', 'inquiry', 'return_or_exchange'])
+    type?: 'complaint' | 'inquiry' | 'return_or_exchange';
 
     @IsNotEmpty()
     @IsString()

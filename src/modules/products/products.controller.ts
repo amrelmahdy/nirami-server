@@ -77,8 +77,12 @@ export class ProductsController {
 
     @UseGuards(JwtAuthGuard)
     @Get(":id")
-    async findProductById(@Param("id") id: string): Promise<Product> {
-        return this.productService.findById(id);
+    async findProductById(
+        @Request() req,
+        @Param("id") id: string
+    ): Promise<Product> {
+        const userId = req.user?.userId;
+        return this.productService.findById(id, userId);
     }
 
     @UseGuards(JwtAuthGuard)

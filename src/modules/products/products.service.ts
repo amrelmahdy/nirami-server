@@ -351,7 +351,7 @@ export class ProductsService {
 
 
 
-    async findById(id: string): Promise<Product> {
+    async findById(id: string, userId?: string): Promise<any> {
         const product = await this.productModel.findById(id).populate([
             'brand',
             {
@@ -372,7 +372,19 @@ export class ProductsService {
             throw new NotFoundException(`Product not found.`);
         }
 
-        return product;
+        let isFavourited = false;
+        if (userId) {
+            const user = await this.userModel.findById(userId).select('favList');
+            if (user && user.favList && Array.isArray(user.favList)) {
+                isFavourited = user.favList.map(id => id.toString()).includes(product._id.toString());
+            }
+        }
+
+        const prodObj = product.toObject ? product.toObject() : product;
+        return {
+            ...prodObj,
+            isFavourited
+        };
     }
 
 

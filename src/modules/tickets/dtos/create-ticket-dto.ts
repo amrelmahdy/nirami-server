@@ -35,7 +35,7 @@ export class CreateTicketDto {
         'closed',
         'returned'
     ])
-    status: 'pending' | 'processing' | 'completed' | 'closed' | 'returned';
+    status: 'created' | 'processing' | 'completed' | 'closed' | 'returned';
 
     @IsOptional()
     @IsString()

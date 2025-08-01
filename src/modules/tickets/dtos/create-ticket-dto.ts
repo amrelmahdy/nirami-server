@@ -27,7 +27,7 @@ export class CreateTicketDto {
 
 
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsEnum([
         'created',
         'processing',

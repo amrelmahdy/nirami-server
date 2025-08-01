@@ -32,7 +32,7 @@ export class TicketsService {
         // Check if a ticket already exists for this orderNumber with status pending or processing
         const existingTicket = await this.ticketModel.findOne({
             orderNumber: ticket.orderNumber,
-            status: { $in: ['pending', 'processing'] }
+            status: { $in: ['created', 'processing'] }
         });
         if (existingTicket) {
             throw new ConflictException('A ticket for this order with status pending or processing already exists');

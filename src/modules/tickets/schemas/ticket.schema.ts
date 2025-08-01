@@ -68,7 +68,7 @@ export class Ticket {
             'completed',
             'closed',
             'returned',
-        ], default: 'pending'
+        ], default: 'created'
     })
     status: TicketStatus;
 

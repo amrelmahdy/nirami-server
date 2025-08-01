@@ -8,10 +8,10 @@ export type TicketType = 'complaint' | 'inquiry' | 'return_or_exchange';
 
 
 export type TicketStatus =
-    | 'pending'
+    | 'created'
     | 'processing'
     | 'completed'
-    | 'cancelled'
+    | 'closed'
     | 'returned';
 
 
@@ -63,10 +63,10 @@ export class Ticket {
     // status of the order
     @Prop({
         type: String, enum: [
-            'pending',
+            'created',
             'processing',
             'completed',
-            'cancelled',
+            'closed',
             'returned',
         ], default: 'pending'
     })

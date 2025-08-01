@@ -25,25 +25,17 @@ export class CreateTicketDto {
     @IsString()
     message: string;
 
-    @IsOptional()
-    @IsEnum([
-        'pending',
-        'processing',
-        'completed',
-        'cancelled',
-        'returned'
-    ])
 
 
     @IsNotEmpty()
     @IsEnum([
-        'pending',
+        'created',
         'processing',
         'completed',
-        'cancelled',
+        'closed',
         'returned'
     ])
-    status: 'pending' | 'processing' | 'completed' | 'cancelled' | 'returned';
+    status: 'pending' | 'processing' | 'completed' | 'closed' | 'returned';
 
     @IsOptional()
     @IsString()

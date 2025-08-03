@@ -70,7 +70,7 @@ export class AuthService {
             // Validation
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             // Saudi phone: starts with 05, 5, or +9665, and 8 digits after
-            const saPhoneRegex = /^(?:\+9665|05|5)[0-9]{8}$/;
+            const saPhoneRegex = /^(?:\+9665|05)[0-9]{8}$/;
 
             const isEmail = emailRegex.test(phoneOrEmail);
             const isPhone = saPhoneRegex.test(phoneOrEmail);

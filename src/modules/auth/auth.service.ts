@@ -226,22 +226,36 @@ export class AuthService {
 
 
     async sendOtp(body: { phoneOrEmail: string }): Promise<any> {
+        console.log
         const { phoneOrEmail } = body
-        try {
-            const otpResponse = await firstValueFrom(
-                this.httpService.post('https://www.msegat.com/gw/sendOTPCode.php', {
-                    lang: 'En',
-                    userName: 'Sultanqd1011',
-                    number: phoneOrEmail, // Use the input here if dynamic
-                    userSender: 'Nirami',
-                    apiKey: 'E71453A252F15D98BD8907E0B9FC9042',
-                }),
-            );
+        // try {
+        //     const otpResponse = await firstValueFrom(
+        //         this.httpService.post('https://www.msegat.com/gw/sendOTPCode.php', {
+        //             lang: 'En',
+        //             userName: 'Sultanqd1011',
+        //             number: phoneOrEmail, // Use the input here if dynamic
+        //             userSender: 'Nirami',
+        //             apiKey: 'E71453A252F15D98BD8907E0B9FC9042',
+        //         }),
+        //     );
 
-            return otpResponse.data;
-        } catch (error) {
-            throw new InternalServerErrorException('Failed to send OTP');
+        //     console.log("OTP Response:", otpResponse.data);
+
+        //     return otpResponse.data;
+        // } catch (error) {
+        //     throw new InternalServerErrorException('Failed to send OTP');
+        // }
+
+
+
+        return {
+            "id": "12345",
+            "success": true,
+            "code": "1110",
+            "result": null
         }
+
+
         // const otp = await this.httpService.post('https://www.msegat.com/gw/sendOTPCode.php',
         //     {
         //         "lang": "En",

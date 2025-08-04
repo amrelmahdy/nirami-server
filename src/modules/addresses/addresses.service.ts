@@ -78,4 +78,23 @@ export class AddressesService {
         }
         return address;
     }
+
+
+    async delete(id: string, userId: string): Promise<Address> {
+        // calidate address id and user id
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            throw new Error('Invalid address ID format');
+        }
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            throw new Error('Invalid user ID format');
+        }
+        // Find the address and delete it
+        return await this.addressModel.findOneAndDelete({ _id: id, user: userId }).populate("user").then(deletedAddress => {
+            if (!deletedAddress) {
+                throw new Error('Address not found or does not belong to the user');
+            }
+            return deletedAddress;
+        });
+    }
+
 }

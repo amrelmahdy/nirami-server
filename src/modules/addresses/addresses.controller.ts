@@ -38,7 +38,15 @@ export class AddressesController {
     @Get(':id')
     async getAddressById(@Param('id') id: string): Promise<Address> {
         return this.addressesService.findById(id);
-    }   
+    }
+
+    // deleteAddress
+    @Post(':id/delete')
+    @UseGuards(JwtAuthGuard)
+    async deleteAddress(@Param('id') id: string, @Request() req): Promise<Address> {
+        const userId = req.user?.userId;
+        return this.addressesService.delete(id, userId);
+    }
 }
 
 

@@ -64,6 +64,8 @@ export class AuthService {
         const userExists = await this.usersService.findByEmailOrPhone(phoneOrEmail, phoneOrEmail);
         let user: User;
 
+        //console.log("userExists", userExists);
+
         if (userExists) { // login with existing user 
             user = userExists;
         } else { // register new user
@@ -71,6 +73,8 @@ export class AuthService {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             // Saudi phone: starts with 05, 5, or +9665, and 8 digits after
             const saPhoneRegex = /^(?:\+9665|05)[0-9]{8}$/;
+
+            console.log("phoneOrEmail", phoneOrEmail);
 
             const isEmail = emailRegex.test(phoneOrEmail);
             const isPhone = saPhoneRegex.test(phoneOrEmail);

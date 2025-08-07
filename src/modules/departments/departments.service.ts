@@ -55,28 +55,27 @@ export class DepartmentsService {
 
     async delete(id: string): Promise<Department> {
         const deleted = await this.departmentModel.findByIdAndDelete(id);
+
         if (!deleted) {
-            throw new NotFoundException("Department not found")
+            throw new NotFoundException("Department not found");
         }
 
         const imageUrl = deleted.image;
 
-        let lastPartWithoutExtension: string | undefined = undefined;
         if (imageUrl) {
-            const parts = imageUrl.split('/');
-            const lastPart = parts.pop();
+            const lastPart = imageUrl.split('/').pop();
+
             if (lastPart) {
-                lastPartWithoutExtension = lastPart.split('.').slice(0, -1).join('.');
+                const fileNameWithoutExtension = lastPart.split('.').slice(0, -1).join('.');
+
+                // Ensure filename isn't empty before calling Cloudinary delete
+                if (fileNameWithoutExtension) {
+                    await this.cloudinaryService.deleteImagesFolder(`departments/${fileNameWithoutExtension}`);
+                }
             }
-
-            this.cloudinaryService.deleteImagesFolder(`departments/${lastPartWithoutExtension}`)
-
-
-            // console.log("Last part without extension:", lastPartWithoutExtension);
         }
 
-        // const currentDirectory = process.cwd();
-        // fs.remove(currentDirectory + "/assets/uploads/products/" + deleted.slug);
         return deleted;
     }
+
 }

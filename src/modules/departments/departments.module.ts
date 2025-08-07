@@ -4,12 +4,15 @@ import { DepartmentsController } from './departments.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { departmentSchema } from './schemas/department.schema';
 import { CategoriesModule } from '../categories/categories.module';
+import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 
 @Module({
-  imports:[
+  imports: [
+    MongooseModule.forFeature([{ name: "Department", schema: departmentSchema }]),
     CategoriesModule,
-    MongooseModule.forFeature([{ name: "Department",schema: departmentSchema }])],
+    CloudinaryModule
+  ],
   providers: [DepartmentsService],
   controllers: [DepartmentsController]
 })
-export class DepartmentsModule {}
+export class DepartmentsModule { }

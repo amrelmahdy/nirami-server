@@ -4,12 +4,15 @@ import { Department } from './schemas/department.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Category } from '../categories/schemas/category.schema'; // adjust path as needed
 import { CategoriesService } from '../categories/categories.service';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class DepartmentsService {
     constructor(
         @InjectModel(Department.name) private departmentModel: mongoose.Model<Department>,
         private categoriesService: CategoriesService,
+        private cloudinaryService: CloudinaryService,
+
         //@InjectModel(Category.name) private categoryModel: mongoose.Model<Category>, // inject Category model
     ) { }
 
@@ -55,7 +58,23 @@ export class DepartmentsService {
         if (!deleted) {
             throw new NotFoundException("Department not found")
         }
-        //this.cloudinaryService.deleteImagesFolder(`products/${deleted.slug}`)
+
+        const imageUrl = deleted.image;
+
+        let lastPartWithoutExtension: string | undefined = undefined;
+        if (imageUrl) {
+            const parts = imageUrl.split('/');
+            const lastPart = parts.pop();
+            if (lastPart) {
+                lastPartWithoutExtension = lastPart.split('.').slice(0, -1).join('.');
+            }
+
+            this.cloudinaryService.deleteImagesFolder(`departments/${lastPartWithoutExtension}`)
+
+
+            // console.log("Last part without extension:", lastPartWithoutExtension);
+        }
+
         // const currentDirectory = process.cwd();
         // fs.remove(currentDirectory + "/assets/uploads/products/" + deleted.slug);
         return deleted;

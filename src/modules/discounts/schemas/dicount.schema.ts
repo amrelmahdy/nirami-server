@@ -26,9 +26,9 @@ export class Discount {
   expiresAt?: Date;
 
   @Prop({ default: 0 })
-  usageCount: number;
+  usageCount?: number;
 
-  @Prop()
+ @Prop({ default: 1 })
   maxUsage?: number;
 }
 

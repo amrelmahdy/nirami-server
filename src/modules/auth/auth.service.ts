@@ -230,7 +230,6 @@ export class AuthService {
 
 
     async sendOtp(body: { phoneOrEmail: string }): Promise<any> {
-        console.log
         const { phoneOrEmail } = body
         try {
             const otpResponse = await firstValueFrom(
@@ -242,7 +241,6 @@ export class AuthService {
                     apiKey: process.env.MSDGAT_API_KEY,
                 }),
             );
-
             return otpResponse.data;
         } catch (error) {
             throw new InternalServerErrorException('Failed to send OTP');

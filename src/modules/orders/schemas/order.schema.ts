@@ -124,6 +124,13 @@ export class Order {
     })
     status: OrderStatus;
 
+
+    @Prop({ type: Date }) // Date when the order was shipped
+    shippedDate?: Date;
+
+    @Prop({ type: String, default: null }) // Transaction ID from payment gateway
+    transactionId?: string | null;
+
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

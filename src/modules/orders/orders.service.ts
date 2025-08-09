@@ -4,21 +4,39 @@ import { Cart } from '../cart/schemas/cart.schema';
 import mongoose from 'mongoose';
 import { Order } from './schemas/order.schema';
 import { CartService } from '../cart/cart.service';
+import { UsersService } from '../users/users.service';
+import { UserRole } from '../users/schemas/user.schema';
 
 @Injectable()
 export class OrdersService {
     constructor(
         @InjectModel(Order.name) private ordersModel: mongoose.Model<Order>,
         private cartService: CartService,
+        private usersService: UsersService,
     ) { }
 
 
     async getOrderHistory(userId: string): Promise<Order[]> {
+        let orders: Order[] = [];
         if (!userId) {
-            throw new NotFoundException('User ID is required to get order history');
+            throw new BadRequestException('User ID is required to get order history');
         }
 
-        const orders = await this.ordersModel.find({ user: userId }).sort({ createdAt: -1 });
+        // get user
+        const user = await this.usersService.findById(userId);
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+
+        if (user.role === UserRole.ADMIN) {
+            orders = await this.ordersModel.find().sort({ createdAt: -1 }).populate("user");
+
+        } else {
+            orders = await this.ordersModel.find({ user: userId }).sort({ createdAt: -1 }).populate("user");;
+
+        }
 
         if (!orders) {
             throw new NotFoundException('No orders found for the given user ID');

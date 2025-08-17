@@ -1,15 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Request, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User, UserRole } from './schemas/user.schema';
 // import { CreateUserDto } from './dtos/create-user.dto';
 // import { EditUserDto } from './dtos/edit-user.dto';
 import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
 import { CreateUserDto } from './dtos/create-user-dto';
-import { RolesGuard } from './guards/user-roles.guard';
-import { Roles } from './guards/roles.decorator';
-import { UpdateUserDto } from './dtos/update-user-dto';
 
-@UseGuards(RolesGuard)
+import { UpdateUserDto } from './dtos/update-user-dto';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/roles/roles.decorator';
+
 @Controller('users')
 export class UsersController {
     constructor(private userService: UsersService) { }
@@ -21,11 +21,14 @@ export class UsersController {
         return this.userService.create(user)
     }
 
-    @UseGuards(JwtAuthGuard)
-    @Get()
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.ADMIN)
-    async getAllUsers(): Promise<User[]> {
-        return this.userService.getAll();
+    @Get()
+    async getAllUsers(
+        @Query('type') type?: UserRole,
+    ): Promise<User[]> {
+        //console.log("req.user: ", req.user);
+        return this.userService.getAll(type);
     }
 
     @UseGuards(JwtAuthGuard)
@@ -35,7 +38,7 @@ export class UsersController {
         return this.userService.findById(id);
     }
 
-   
+
     @UseGuards(JwtAuthGuard)
     //@Roles(UserRole.ADMIN)
     @Put(":id")

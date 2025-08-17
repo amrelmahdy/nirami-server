@@ -19,14 +19,16 @@ export class UsersService {
         // private productsService: ProductsService
     ) { }
 
-    async getAll(): Promise<User[]> {
-        const users = await this.usersModel.find({});
-        return users
+    async getAll(type?: UserRole): Promise<User[]> {
+        if (type) {
+            return this.usersModel.find({ role: type });
+        }
+        return this.usersModel.find({});
     }
 
 
     async register(user: User): Promise<User> {
-        const res = await this.usersModel.create({ ...user,  role: UserRole.USER });
+        const res = await this.usersModel.create({ ...user, role: UserRole.USER });
         return res
     }
 

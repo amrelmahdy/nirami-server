@@ -11,23 +11,27 @@ import { ConfigService } from '@nestjs/config';
 import { CacheModule } from '../cache/cache.module';
 import { OtpStrategy } from './strategies/otp.strategy';
 import { HttpModule } from '@nestjs/axios';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Module({
-    imports: [
-        UsersModule,
-        HttpModule,
-        CacheModule,
-        PassportModule,
-        JwtModule.registerAsync({
-          inject: [ConfigService],
-          useFactory: async (configService: ConfigService) => {
-            return {
-              secret: configService.get<string>('JWT_SECRET'),
-              signOptions: { expiresIn: '86400s' },
-            };
-          },
-        })
-      ],    controllers: [AuthController],
-    providers: [AuthService, LocalStrategy, JwtStrategy, RefreshTokenJwtStrategy, OtpStrategy],
+  imports: [
+    UsersModule,
+    HttpModule,
+    CacheModule,
+    PassportModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }), // 👈 important!
+    JwtModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => {
+        return {
+          secret: configService.get<string>('JWT_SECRET'),
+          signOptions: { expiresIn: '86400s' },
+        };
+      },
+    })
+  ], controllers: [AuthController],
+  providers: [AuthService, LocalStrategy, JwtStrategy, RefreshTokenJwtStrategy, OtpStrategy],
+  // exports: [JwtAuthGuard, RolesGuard], // 👈 make sure they can be used elsewhere
+
 })
-export class AuthModule {}
+export class AuthModule { }

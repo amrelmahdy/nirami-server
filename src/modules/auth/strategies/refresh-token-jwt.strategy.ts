@@ -13,6 +13,7 @@ export class RefreshTokenJwtStrategy extends PassportStrategy(Strategy, 'jwt-ref
   }
 
   async validate(payload: any) {
+    console.log("payload: ", payload);
     return {
       userId: payload.userId, 
       user: payload.sub, 

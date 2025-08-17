@@ -29,7 +29,9 @@ export class AuthService {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 phone: user.phone,
+                role: user.role,
             },
+            role: user.role,
         };
 
         const accessTokenExpiry = parseInt(process.env.JWT_EXPIRES_IN || '86400', 10); // default: 1 day
@@ -103,8 +105,10 @@ export class AuthService {
                 firstNname: user.firstName,
                 lastNname: user.lastName,
                 phone: user.phone,
-                email: user.email
-            }
+                email: user.email,
+                role: user.role,
+            },
+            role: user.role,
         };
         // Calculate expiration time for access token (1 day)
         const accessTokenExpiresAt = now + (86400 * 1000); // 86400 seconds * 1000 milliseconds/second

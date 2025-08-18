@@ -2,10 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { Group } from './schemas/group.schema';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class GroupsService {
-    constructor(@InjectModel(Group.name) private groupModel: mongoose.Model<Group>) { }
+    constructor(
+        @InjectModel(Group.name) private groupModel: mongoose.Model<Group>,
+        private cloudinaryService: CloudinaryService,
+    ) { }
 
     async findAll(filters: { query?: string; categoryId?: string } = {}): Promise<Group[]> {
         const { query, categoryId } = filters;
@@ -49,9 +53,19 @@ export class GroupsService {
         if (!deleted) {
             throw new NotFoundException("Group not found")
         }
-        //this.cloudinaryService.deleteImagesFolder(`products/${deleted.slug}`)
-        // const currentDirectory = process.cwd();
-        // fs.remove(currentDirectory + "/assets/uploads/products/" + deleted.slug);
+         const imageUrl = deleted.image;
+
+        if (imageUrl) {
+            const lastPart = imageUrl.split('/').pop();
+
+            if (lastPart) {
+                const fileNameWithoutExtension = lastPart.split('.').slice(0, -1).join('.');
+                // Ensure filename isn't empty before calling Cloudinary delete
+                if (fileNameWithoutExtension) {
+                    await this.cloudinaryService.deleteImagesFolder(`groups/${fileNameWithoutExtension}`);
+                }
+            }
+        }
         return deleted;
     }
 }

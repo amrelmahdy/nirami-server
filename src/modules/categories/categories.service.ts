@@ -2,10 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Category } from './schemas/category.schema';
 import mongoose from 'mongoose';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class CategoriesService {
-    constructor(@InjectModel(Category.name) private categoryModel: mongoose.Model<Category>) { }
+    constructor(
+        @InjectModel(Category.name) private categoryModel: mongoose.Model<Category>,
+        private cloudinaryService: CloudinaryService
+    ) { }
 
     async findAll(filters: { query?: string; departmentId?: string } = {}): Promise<Category[]> {
         const { query, departmentId } = filters;
@@ -15,7 +19,7 @@ export class CategoriesService {
             filter.name = { $regex: query, $options: 'i' };
         }
 
-        
+
         if (departmentId) {
             if (mongoose.Types.ObjectId.isValid(departmentId)) {
                 filter.department = departmentId;
@@ -55,9 +59,21 @@ export class CategoriesService {
         if (!deleted) {
             throw new NotFoundException("Category not found")
         }
-        //this.cloudinaryService.deleteImagesFolder(`products/${deleted.slug}`)
-        // const currentDirectory = process.cwd();
-        // fs.remove(currentDirectory + "/assets/uploads/products/" + deleted.slug);
+
+        const imageUrl = deleted.image;
+
+        if (imageUrl) {
+            const lastPart = imageUrl.split('/').pop();
+
+            if (lastPart) {
+                const fileNameWithoutExtension = lastPart.split('.').slice(0, -1).join('.');
+                // Ensure filename isn't empty before calling Cloudinary delete
+                if (fileNameWithoutExtension) {
+                    await this.cloudinaryService.deleteImagesFolder(`categories/${fileNameWithoutExtension}`);
+                }
+            }
+        }
+
         return deleted;
     }
 }

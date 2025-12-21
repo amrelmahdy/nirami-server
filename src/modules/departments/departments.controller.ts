@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { DepartmentsService } from './departments.service';
 import { CreateDepartmentDto } from './dtos/create-department-dto';
 import { Department } from './schemas/department.schema';
+import { EditDepartmentDto } from './dtos/edit-department-dto';
 
 @Controller('departments')
 export class DepartmentsController {
@@ -14,9 +15,19 @@ export class DepartmentsController {
 
 
     @Post()
-    cretae(@Body() brand: CreateDepartmentDto) {
-        return this.departmentsService.create(brand);
+    cretae(@Body() department: CreateDepartmentDto) {
+        return this.departmentsService.create(department);
     }
+
+
+    @Put(':id')
+    async update(
+        @Param('id') id: string,
+        @Body() product: EditDepartmentDto
+    ): Promise<Department> {
+        return this.departmentsService.update(id, product);
+    }
+
 
 
     @Delete(":id")

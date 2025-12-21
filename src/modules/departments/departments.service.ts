@@ -53,6 +53,16 @@ export class DepartmentsService {
     }
 
 
+
+    async update(id: string, department: Department): Promise<Department> {
+        const updatedDepartment = await this.departmentModel.findByIdAndUpdate(id, department, { new: true });
+        if (!updatedDepartment) {
+            throw new NotFoundException("Department not found");
+        }
+        return updatedDepartment;
+    }
+
+
     async delete(id: string): Promise<Department> {
         const deleted = await this.departmentModel.findByIdAndDelete(id);
 

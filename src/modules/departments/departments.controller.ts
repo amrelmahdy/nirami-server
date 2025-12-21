@@ -14,6 +14,13 @@ export class DepartmentsController {
     }
 
 
+
+    @Get(":id")
+    getBrandById(@Param("id") id: string): Promise<Department> {
+        return this.departmentsService.findById(id);
+    }
+
+
     @Post()
     cretae(@Body() department: CreateDepartmentDto) {
         return this.departmentsService.create(department);
@@ -23,9 +30,9 @@ export class DepartmentsController {
     @Put(':id')
     async update(
         @Param('id') id: string,
-        @Body() product: EditDepartmentDto
+        @Body() department: EditDepartmentDto
     ): Promise<Department> {
-        return this.departmentsService.update(id, product);
+        return this.departmentsService.update(id, department);
     }
 
 

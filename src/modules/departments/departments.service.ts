@@ -55,7 +55,13 @@ export class DepartmentsService {
 
 
     async update(id: string, department: Department): Promise<Department> {
-        const updatedDepartment = await this.departmentModel.findByIdAndUpdate(id, department, { new: true });
+
+         if (!mongoose.Types.ObjectId.isValid(id)) {
+            return Promise.reject(new NotFoundException("Department not found"));
+        }
+
+        const updatedDepartment = await this.departmentModel.findByIdAndUpdate(id, department, { new: true });       
+
         if (!updatedDepartment) {
             throw new NotFoundException("Department not found");
         }

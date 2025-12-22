@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import mongoose from 'mongoose';
 import { Department } from './schemas/department.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Category } from '../categories/schemas/category.schema'; // adjust path as needed
 import { CategoriesService } from '../categories/categories.service';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
@@ -45,6 +44,10 @@ export class DepartmentsService {
     }
 
     async findById(id: string): Promise<Department> {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return Promise.reject(new NotFoundException("Department not found"));
+        }
+
         const department = await this.departmentModel.findById(id);
         if (!department) {
             throw new NotFoundException("Department not found");
@@ -55,12 +58,11 @@ export class DepartmentsService {
 
 
     async update(id: string, department: Department): Promise<Department> {
-
-         if (!mongoose.Types.ObjectId.isValid(id)) {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
             return Promise.reject(new NotFoundException("Department not found"));
         }
 
-        const updatedDepartment = await this.departmentModel.findByIdAndUpdate(id, department, { new: true });       
+        const updatedDepartment = await this.departmentModel.findByIdAndUpdate(id, department, { new: true });
 
         if (!updatedDepartment) {
             throw new NotFoundException("Department not found");

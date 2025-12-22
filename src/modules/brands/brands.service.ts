@@ -2,12 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import mongoose from 'mongoose';
 import { Brand } from './schemas/brand.schema';
 import { InjectModel } from '@nestjs/mongoose';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class BrandsService {
     constructor(
         @InjectModel(Brand.name)
-        private brandModel: mongoose.Model<Brand>
+        private brandModel: mongoose.Model<Brand>,
+        private cloudinaryService: CloudinaryService,
     ) { }
 
 
@@ -16,7 +18,7 @@ export class BrandsService {
         return brands;
     }
 
-    async create(brand: Brand){
+    async create(brand: Brand) {
         return this.brandModel.create(brand);
     }
 
@@ -42,6 +44,32 @@ export class BrandsService {
         if (!updatedBrand) {
             throw new NotFoundException("Brand not found");
         }
-        return updatedBrand;                
+        return updatedBrand;
+    }
+
+
+    async delete(id: string): Promise<Brand> {
+        const deleted = await this.brandModel.findByIdAndDelete(id);
+
+        if (!deleted) {
+            throw new NotFoundException("Brand not found");
+        }
+
+        const imageUrl = deleted.image;
+
+        if (imageUrl) {
+            const lastPart = imageUrl.split('/').pop();
+
+            if (lastPart) {
+                const fileNameWithoutExtension = lastPart.split('.').slice(0, -1).join('.');
+
+                // Ensure filename isn't empty before calling Cloudinary delete
+                if (fileNameWithoutExtension) {
+                    await this.cloudinaryService.deleteImagesFolder(`brands/${fileNameWithoutExtension}`);
+                }
+            }
+        }
+
+        return deleted;
     }
 }

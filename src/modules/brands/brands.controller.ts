@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { Brand } from './schemas/brand.schema';
 import { BrandsService } from './brands.service';
 import { CreateBrandDto } from './dtos/create-brand-dto';
@@ -26,10 +26,17 @@ export class BrandsController {
     updateBrand(@Param("id") id: string, @Body() brand: EditBrandDto): Promise<Brand> {
         return this.brandService.update(id, brand);
     }
-    
+
 
     @Post()
     cretae(@Body() brand: CreateBrandDto) {
         return this.brandService.create(brand);
+    }
+
+
+
+    @Delete(":id")
+    delete(@Param("id") id: string) {
+        return this.brandService.delete(id);
     }
 }

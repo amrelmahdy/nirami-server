@@ -48,12 +48,22 @@ export class GroupsService {
         return group;
     }
 
+
+    async update(id: string, group: Group): Promise<Group> {
+        const updatedGroup = await this.groupModel.findByIdAndUpdate(id, group, { new: true });
+        if (!updatedGroup) {
+            throw new NotFoundException("Group not found");
+        }
+        return updatedGroup;
+    }
+
+
     async delete(id: string): Promise<Group> {
         const deleted = await this.groupModel.findOneAndDelete({ _id: id });
         if (!deleted) {
             throw new NotFoundException("Group not found")
         }
-         const imageUrl = deleted.image;
+        const imageUrl = deleted.image;
 
         if (imageUrl) {
             const lastPart = imageUrl.split('/').pop();

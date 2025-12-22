@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { Group } from './schemas/group.schema';
 import { GroupsService } from './groups.service';
 import { CreateGroupDto } from './dtos/create-group-dto';
+import { EditGroupDto } from './dtos/edit-group-dto';
 
 @Controller('groups')
 export class GroupsController {
@@ -19,6 +20,19 @@ export class GroupsController {
     @Post()
     cretae(@Body() group: CreateGroupDto) {
         return this.groupsService.create(group);
+    }
+
+
+    @Get(":id")
+    getBrandById(@Param("id") id: string): Promise<Group> {
+        return this.groupsService.findById(id);
+    }
+
+
+
+    @Put(":id")
+    updateBrand(@Param("id") id: string, @Body() group: EditGroupDto): Promise<Group> {
+        return this.groupsService.update(id, group);
     }
 
 

@@ -54,6 +54,16 @@ export class CategoriesService {
         return category;
     }
 
+
+    async update(id: string, category: Category): Promise<Category> {
+        const updatedBrand = await this.categoryModel.findByIdAndUpdate(id, category, { new: true });
+        if (!updatedBrand) {
+            throw new NotFoundException("Category not found");
+        }
+        return updatedBrand;
+    }
+    
+
     async delete(id: string): Promise<Category> {
         const deleted = await this.categoryModel.findOneAndDelete({ _id: id });
         if (!deleted) {

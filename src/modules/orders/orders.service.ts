@@ -103,32 +103,43 @@ export class OrdersService {
 
         if (user.role === UserRole.ADMIN) {
             if (orderId.startsWith("ORD-")) {
-                order = await this.ordersModel.findOne({  orderNumber: orderId }).populate({
-                    path: 'items.product',
-                    populate: { path: 'brand' }
-                });
+                order = await this.ordersModel.findOne({ orderNumber: orderId }).populate([
+                    {
+                        path: 'user',
+                    },
+                    { path: "shippingAddress" },
+                    {
+                        path: 'items.product',
+                        populate: { path: 'brand' }
+                    }]);
             } else {
                 // Cast the result to Order to satisfy TypeScript, but note this is only safe if the Cart and Order schemas are compatible.
-                order = await this.ordersModel.findOne({  _id: orderId }).populate({
-                    path: 'items.product',
-                    populate: { path: 'brand' }
-                });
+                order = await this.ordersModel.findOne({ _id: orderId }).populate([
+                    { path: 'user' },
+                    {
+                        path: 'items.product',
+                        populate: { path: 'brand' }
+                    }]);
             }
 
 
         } else {
 
             if (orderId.startsWith("ORD-")) {
-                order = await this.ordersModel.findOne({ user: userId, orderNumber: orderId }).populate({
-                    path: 'items.product',
-                    populate: { path: 'brand' }
-                });
+                order = await this.ordersModel.findOne({ user: userId, orderNumber: orderId }).populate([
+                    { path: 'user' },
+                    {
+                        path: 'items.product',
+                        populate: { path: 'brand' }
+                    }]);
             } else {
                 // Cast the result to Order to satisfy TypeScript, but note this is only safe if the Cart and Order schemas are compatible.
-                order = await this.ordersModel.findOne({ user: userId, _id: orderId }).populate({
-                    path: 'items.product',
-                    populate: { path: 'brand' }
-                });
+                order = await this.ordersModel.findOne({ user: userId, _id: orderId }).populate([
+                    { path: 'user' },
+                    {
+                        path: 'items.product',
+                        populate: { path: 'brand' }
+                    }]);
             }
 
         }

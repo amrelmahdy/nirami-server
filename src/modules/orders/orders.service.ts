@@ -90,18 +90,48 @@ export class OrdersService {
     }
 
     async getOrderDetails(userId: string, orderId: string): Promise<Order> {
-        if (!userId) {
-            throw new NotFoundException('User ID is required to get order details');
+        const user = await this.usersService.findById(userId);
+
+        if (!user) {
+            throw new NotFoundException('User is required to get order details');
         }
         if (!orderId) {
             throw new NotFoundException('Order ID is required to get order details');
         }
 
-        // Cast the result to Order to satisfy TypeScript, but note this is only safe if the Cart and Order schemas are compatible.
-        const order = await this.ordersModel.findOne({ user: userId, _id: orderId }).populate({
-            path: 'items.product',
-            populate: { path: 'brand' }
-        });;
+        let order: Order | null;
+
+        if (user.role === UserRole.ADMIN) {
+            if (orderId.startsWith("ORD-")) {
+                order = await this.ordersModel.findOne({  orderNumber: orderId }).populate({
+                    path: 'items.product',
+                    populate: { path: 'brand' }
+                });
+            } else {
+                // Cast the result to Order to satisfy TypeScript, but note this is only safe if the Cart and Order schemas are compatible.
+                order = await this.ordersModel.findOne({  _id: orderId }).populate({
+                    path: 'items.product',
+                    populate: { path: 'brand' }
+                });
+            }
+
+
+        } else {
+
+            if (orderId.startsWith("ORD-")) {
+                order = await this.ordersModel.findOne({ user: userId, orderNumber: orderId }).populate({
+                    path: 'items.product',
+                    populate: { path: 'brand' }
+                });
+            } else {
+                // Cast the result to Order to satisfy TypeScript, but note this is only safe if the Cart and Order schemas are compatible.
+                order = await this.ordersModel.findOne({ user: userId, _id: orderId }).populate({
+                    path: 'items.product',
+                    populate: { path: 'brand' }
+                });
+            }
+
+        }
 
         if (!order) {
             throw new NotFoundException('Order not found for the given user ID and order ID');

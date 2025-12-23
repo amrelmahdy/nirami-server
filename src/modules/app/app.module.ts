@@ -22,6 +22,7 @@ import { AddressesModule } from '../addresses/addresses.module';
 import { OrdersModule } from '../orders/order.module';
 import { TicketsModule } from '../tickets/tickets.module';
 import { DiscountsModule } from '../discounts/discounts.module';
+import { SettingsModule } from '../settings/settings.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -60,7 +61,8 @@ import { DiscountsModule } from '../discounts/discounts.module';
     AddressesModule,
     OrdersModule,
     TicketsModule,
-    DiscountsModule
+    DiscountsModule,
+    SettingsModule
   ],
   controllers: [AppController],
   providers: [AppService],

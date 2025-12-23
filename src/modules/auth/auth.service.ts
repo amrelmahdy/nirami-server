@@ -21,7 +21,6 @@ export class AuthService {
     async login(user: User) {
         const now = Date.now();
         const userId = (user as any)._id?.toString();
-
         const payload = {
             userId,
             username: user.email,
@@ -324,7 +323,7 @@ export class AuthService {
 
     async validateUser(username: string, password: string): Promise<Partial<User> | null> {
         const user = await this.usersService.findByEmailOrPhone(username, username);
-        if (!user) return null;
+        if (!user || !user.role) return null;
 
         const isPasswordValid = await bcryptjs.compare(password, user.password);
         if (!isPasswordValid) return null;

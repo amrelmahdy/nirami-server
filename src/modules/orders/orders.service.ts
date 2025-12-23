@@ -151,5 +151,16 @@ export class OrdersService {
         return order;
     }
 
+    async update(id: string, order: { status: string }): Promise<Order> {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return Promise.reject(new NotFoundException("Order not found"));
+        }
 
+        const updatedOrder = await this.ordersModel.findByIdAndUpdate(id, order, { new: true });
+
+        if (!updatedOrder) {
+            throw new NotFoundException("Order not found");
+        }
+        return updatedOrder;
+    }
 }

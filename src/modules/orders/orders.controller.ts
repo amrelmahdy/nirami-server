@@ -1,10 +1,11 @@
-import { Body, Controller, Get, NotFoundException, Param, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Param, Post, Put, Request, UseGuards } from '@nestjs/common';
 import { CartService } from '../cart/cart.service';
 import { Cart } from '../cart/schemas/cart.schema';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Order } from './schemas/order.schema';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dtos/create-order-dto';
+import { EditOrderDto } from './dtos/edit-order-dto';
 
 @Controller('orders')
 export class OrderController {
@@ -51,4 +52,12 @@ export class OrderController {
         return this.orderService.getOrderDetails(userId, orderId);
     }
 
+    @UseGuards(JwtAuthGuard)
+    @Put(':orderId')
+    async update(
+        @Param('orderId') orderId: string,
+        @Body() order: EditOrderDto
+    ): Promise<Order> {
+        return this.orderService.update(orderId, order);
+    }
 }

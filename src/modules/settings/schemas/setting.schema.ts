@@ -18,22 +18,23 @@ import { User } from 'src/modules/users/schemas/user.schema';
 
 @Schema({ timestamps: false })
 export class Setting {
-    @Prop()
-    aboutUs: string;
 
-    @Prop()
-    ourStory: string;
+    @Prop({ type: Object })
+    aboutUs: Record<string, string>;
 
-    @Prop()
-    returnAndExchangePolicy: string;
+    @Prop({ type: Object })
+    ourStory: Record<string, string>;
+
+    @Prop({ type: Object })
+    returnAndExchangePolicy: Record<string, string>;
 
     @Prop()
     contactWhatsapp: string;
 
-     @Prop()
+    @Prop()
     contactPhone: string;
 
-     @Prop()
+    @Prop()
     contactEmail: string;
 }
 

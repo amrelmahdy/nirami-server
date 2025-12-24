@@ -4,14 +4,18 @@ import { IsLocalizedString } from 'src/config/validation';
 // import { Image } from 'src/utils/schemas';
 
 export class EditSettingsDto {
-    @IsNotEmpty()
-    aboutUs: string;
 
     @IsNotEmpty()
-    ourStory: string;
+    @IsLocalizedString(['en', 'ar'], { message: 'Value must have valid language keys and strings' })
+    aboutUs: Record<string, string>;
 
     @IsNotEmpty()
-    returnAndExchangePolicy: string;
+    @IsLocalizedString(['en', 'ar'], { message: 'Value must have valid language keys and strings' })
+    ourStory: Record<string, string>;
+
+    @IsNotEmpty()
+    @IsLocalizedString(['en', 'ar'], { message: 'Value must have valid language keys and strings' })
+    returnAndExchangePolicy: Record<string, string>;
 
     @IsNotEmpty()
     contactWhatsapp: string;

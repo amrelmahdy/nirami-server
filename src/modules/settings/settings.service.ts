@@ -14,9 +14,18 @@ export class SettingsService {
         const settings = await this.settingsModel.findOne();
         if (!settings) {
             return this.settingsModel.create({
-                aboutUs: '',
-                ourStory: '',
-                returnAndExchangePolicy: '',
+                aboutUs: {
+                    en: '',
+                    ar: ''
+                },
+                ourStory: {
+                    en: '',
+                    ar: ''
+                },
+                returnAndExchangePolicy: {
+                    en: '',
+                    ar: ''
+                },
                 contactWhatsapp: '',
                 contactPhone: '',
                 contactEmail: '',

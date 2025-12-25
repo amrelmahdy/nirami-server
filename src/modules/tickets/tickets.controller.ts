@@ -8,16 +8,16 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 export class TicketsController {
     constructor(private ticketsService: TicketsService) { }
 
+    @UseGuards(JwtAuthGuard)
     @Get()
-    findAll() {
-        return this.ticketsService.findAll();
+    findAll(@Request() req): Promise<Ticket[]> {
+        const userId = req.user?.userId;
+        if (req.user?.user?.role) {
+            return this.ticketsService.findAll();
+        }
+        return this.ticketsService.findAll(userId);
     }
 
-
-    @Get("user")
-    getTicketsByUserId(): Promise<Ticket[]> {
-        return this.ticketsService.findTicketsByUserId();
-    }
 
     @Get(":id")
     getTicketById(@Param("id") id: string): Promise<Ticket> {

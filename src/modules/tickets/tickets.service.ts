@@ -14,14 +14,16 @@ export class TicketsService {
     ) { }
 
 
-    async findAll(): Promise<Ticket[]> {
-        return this.ticketModel.find();
+    async findAll(userId?: string): Promise<Ticket[]> {
+         if (!userId) {
+             return this.ticketModel.find();
+        }
+        return this.ticketModel.find({ user: userId });
     }
 
     async create(userId: string, ticket: CreateTicketDto): Promise<Ticket> {
-
         if (!userId) {
-            throw new NotFoundException('User ID is required to checkout');
+            throw new NotFoundException('User ID is required');
         }
 
         if (!ticket.name || !ticket.email || !ticket.orderNumber) {

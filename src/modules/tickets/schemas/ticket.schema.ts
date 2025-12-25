@@ -31,6 +31,9 @@ export type TicketStatus =
 export class Ticket {
 
 
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
+    user: mongoose.Schema.Types.ObjectId;
+
     @Prop({ type: String, unique: true, required: false })
     ticketNumber?: string;
 

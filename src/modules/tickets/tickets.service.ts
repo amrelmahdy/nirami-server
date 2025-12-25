@@ -17,7 +17,12 @@ export class TicketsService {
         return this.ticketModel.find();
     }
 
-    async create(ticket: Ticket): Promise<Ticket> {
+    async create(ticket: Ticket, userId: string): Promise<Ticket> {
+
+         if (!userId) {
+            throw new NotFoundException('User ID is required to checkout');
+        }
+
         if (!ticket.name || !ticket.email || !ticket.orderNumber) {
             throw new Error('Name, email, and order are required fields');
         }
@@ -38,6 +43,24 @@ export class TicketsService {
             throw new ConflictException('A ticket for this order with status pending or processing already exists');
         }
 
-        return this.ticketModel.create(ticket);
+        return this.ticketModel.create({ ...ticket, user: userId });
     }
+
+    async findTicketsByUserId(): Promise<Ticket[]> {
+        // For demonstration, using a hardcoded userId. In a real application, retrieve this from the authenticated user context.
+        const userId = '64a7f0c2e1b2c8b1a1a1a1a1'; // Replace with actual user ID retrieval logic
+
+        return this.ticketModel.find({ userId: userId });
+    }
+
+
+
+    async findById(id: string): Promise<Ticket> {
+        const ticket = await this.ticketModel.findById(id);
+        if (!ticket) {
+            throw new NotFoundException("Ticket not found");
+        }
+        return ticket;
+    }
+
 }

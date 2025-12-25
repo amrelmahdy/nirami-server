@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Patch, Param, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Body, Get, Patch, Param, BadRequestException, Request, NotFoundException } from '@nestjs/common';
 import { CreateTicketDto } from './dtos/create-ticket-dto';
 import { TicketsService } from './tickets.service';
 import { Ticket } from './schemas/ticket.schema';
@@ -12,9 +12,27 @@ export class TicketsController {
         return this.ticketsService.findAll();
     }
 
+
+    @Get("user")
+    getTicketsByUserId(): Promise<Ticket[]> {
+        return this.ticketsService.findTicketsByUserId();
+    }
+
+    @Get(":id")
+    getTicketById(@Param("id") id: string): Promise<Ticket> {
+        return this.ticketsService.findById();
+    }
+
+
+
     @Post()
-    create(@Body() ticket: CreateTicketDto) {
-        return this.ticketsService.create(ticket);
+    create(@Request() req,
+        @Body() ticket: CreateTicketDto) {
+        const userId = req.user?.userId;
+        if (!userId) {
+            throw new NotFoundException('User ID is required to checkout');
+        }
+        return this.ticketsService.create(ticket, userId);
     }
 
     // // update the status of a ticket

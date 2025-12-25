@@ -1,7 +1,8 @@
-import { Controller, Post, Body, Get, Patch, Param, BadRequestException, Request, NotFoundException } from '@nestjs/common';
+import { Controller, Post, Body, Get, Patch, Param, BadRequestException, Request, NotFoundException, UseGuards } from '@nestjs/common';
 import { CreateTicketDto } from './dtos/create-ticket-dto';
 import { TicketsService } from './tickets.service';
 import { Ticket } from './schemas/ticket.schema';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('tickets')
 export class TicketsController {
@@ -23,6 +24,8 @@ export class TicketsController {
         return this.ticketsService.findById(id);
     }
 
+
+    @UseGuards(JwtAuthGuard)
     @Post()
     create(@Request() req,
         @Body() ticket: CreateTicketDto) {
@@ -33,7 +36,7 @@ export class TicketsController {
         return this.ticketsService.create(userId, ticket);
     }
 
-  
+
 
     // // update the status of a ticket
     // @Patch(':id/status')

@@ -20,10 +20,8 @@ export class TicketsController {
 
     @Get(":id")
     getTicketById(@Param("id") id: string): Promise<Ticket> {
-        return this.ticketsService.findById();
+        return this.ticketsService.findById(id);
     }
-
-
 
     @Post()
     create(@Request() req,
@@ -32,8 +30,10 @@ export class TicketsController {
         if (!userId) {
             throw new NotFoundException('User ID is required to checkout');
         }
-        return this.ticketsService.create(ticket, userId);
+        return this.ticketsService.create(userId, ticket);
     }
+
+  
 
     // // update the status of a ticket
     // @Patch(':id/status')

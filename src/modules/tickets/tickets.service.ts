@@ -4,6 +4,7 @@ import { Ticket } from './schemas/ticket.schema';
 import mongoose from 'mongoose';
 import { Order } from '../orders/schemas/order.schema';
 import e from 'express';
+import { CreateTicketDto } from './dtos/create-ticket-dto';
 
 @Injectable()
 export class TicketsService {
@@ -17,9 +18,9 @@ export class TicketsService {
         return this.ticketModel.find();
     }
 
-    async create(ticket: Ticket, userId: string): Promise<Ticket> {
+    async create(userId: string, ticket: CreateTicketDto): Promise<Ticket> {
 
-         if (!userId) {
+        if (!userId) {
             throw new NotFoundException('User ID is required to checkout');
         }
 
@@ -63,4 +64,5 @@ export class TicketsService {
         return ticket;
     }
 
+                
 }

@@ -1,13 +1,5 @@
 // create dto for creating an order
-import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
-import { Type } from 'class-transformer';
-import { IsLocalizedString } from 'src/config/validation';
-import { User } from 'src/modules/users/schemas/user.schema';
-import { CartItem } from 'src/modules/cart/schemas/cart-item.schema';
-
-
-
-
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateOrderDto {
 

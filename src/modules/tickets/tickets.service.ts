@@ -59,7 +59,7 @@ export class TicketsService {
 
 
     async findById(id: string): Promise<Ticket> {
-        const ticket = await this.ticketModel.findById(id);
+        const ticket = await this.ticketModel.findById(id).populate('user');
         if (!ticket) {
             throw new NotFoundException("Ticket not found");
         }

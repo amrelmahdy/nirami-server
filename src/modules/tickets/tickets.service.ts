@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import { Order } from '../orders/schemas/order.schema';
 import e from 'express';
 import { CreateTicketDto } from './dtos/create-ticket-dto';
+import { EditTicketDto } from './dtos/edit-ticket-dto';
 
 @Injectable()
 export class TicketsService {
@@ -15,8 +16,8 @@ export class TicketsService {
 
 
     async findAll(userId?: string): Promise<Ticket[]> {
-         if (!userId) {
-             return this.ticketModel.find();
+        if (!userId) {
+            return this.ticketModel.find();
         }
         return this.ticketModel.find({ user: userId });
     }
@@ -66,5 +67,20 @@ export class TicketsService {
         return ticket;
     }
 
-                
+
+    async update(id: string, ticket: EditTicketDto): Promise<Ticket> {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return Promise.reject(new NotFoundException("Order not found"));
+        }
+
+        const updatedTicket = await this.ticketModel.findByIdAndUpdate(id, ticket, { new: true });
+
+        if (!updatedTicket) {
+            throw new NotFoundException("Ticket not found");
+        }
+        return updatedTicket;
+    }
+
+
+
 }

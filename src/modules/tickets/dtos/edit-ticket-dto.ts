@@ -1,27 +1,24 @@
 import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export class CreateTicketDto {
-    @IsNotEmpty()
-    orderNumber: string;
-
-    @IsNotEmpty()
+export class EditTicketDto {
+    @IsOptional()
     @IsString()
     name: string;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     @IsEmail()
     email: string;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     phone: string;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsEnum(['complaint', 'inquiry', 'return_or_exchange'])
     type?: 'complaint' | 'inquiry' | 'return_or_exchange';
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     message: string;
 

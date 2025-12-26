@@ -1,8 +1,10 @@
-import { Controller, Post, Body, Get, Patch, Param, BadRequestException, Request, NotFoundException, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Patch, Param, BadRequestException, Request, NotFoundException, UseGuards, Put } from '@nestjs/common';
 import { CreateTicketDto } from './dtos/create-ticket-dto';
 import { TicketsService } from './tickets.service';
 import { Ticket } from './schemas/ticket.schema';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Order } from '../orders/schemas/order.schema';
+import { EditTicketDto } from './dtos/edit-ticket-dto';
 
 @Controller('tickets')
 export class TicketsController {
@@ -37,13 +39,14 @@ export class TicketsController {
     }
 
 
+    @UseGuards(JwtAuthGuard)
+    @Put(':ticketId')
+    async update(
+        @Param('ticketId') ticketId: string,
+        @Body() ticket: EditTicketDto
+    ): Promise<Ticket> {
+        return this.ticketsService.update(ticketId, ticket);
+    }
 
-    // // update the status of a ticket
-    // @Patch(':id/status')
-    // updateStatus(@Param('id') id: string, @Body() status: Ticket ) {
-    //     if (!status || !status.status) {
-    //         throw new BadRequestException('Status is required');
-    //     }                                                              
-    //     return this.ticketsService.updateStatus(id, status);     
-    // }                        
+                       
 }

@@ -319,25 +319,34 @@ export class AuthService {
     }
 
 
-    async verifyOtp(otpId, code): Promise<{
+    async verifyOtp(phoneOrEmail, code): Promise<{
         "code": string,
         "message": string,
         "result": string | null
     }> {
         try {
-            const verifyOtpResponse = await firstValueFrom(
-                this.httpService.post(' https://www.msegat.com/gw/verifyOTPCode.php',
+            const otpResponse = await firstValueFrom(
+                this.httpService.post(
+                    'api.authentica.sa/api/v2/verify-otp',
                     {
-                        "lang": "En",
-                        "userName": "Sultanqd1011",
-                        "userSender": "Nirami",
-                        "apiKey": "E71453A252F15D98BD8907E0B9FC9042",
-                        "code": code,
-                        "id": otpId
-                    }
+                        "phone": phoneOrEmail,
+                        "email": "email@test.test",
+                        "otp": code
+                        // lang: 'En',
+                        // number: phoneOrEmail,
+                        // userSender: process.env.MSDGAT_SENDER_NAME || 'Nirami',
+                    },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-Authorization': process.env.AUTHENTICA_API_KEY,
+                        },
+                    },
                 ),
             );
-            return verifyOtpResponse.data;
+
+            return otpResponse.data;
         } catch (error) {
             throw new InternalServerErrorException('Failed to send OTP');
         }

@@ -235,15 +235,39 @@ export class AuthService {
     async sendOtp(body: { phoneOrEmail: string }): Promise<any> {
         const { phoneOrEmail } = body
         try {
+            // const otpResponse = await firstValueFrom(
+            //     this.httpService.post('https://www.msegat.com/gw/sendOTPCode.php', {
+            //         lang: 'En',
+            //         userName: process.env.MSDGAT_USER_NAME,
+            //         number: phoneOrEmail, // Use the input here if dynamic
+            //         userSender: process.env.MSDGAT_SENDER_NAME || 'Nirami',
+            //         apiKey: process.env.MSDGAT_API_KEY,
+            //     }),
+            // );
+            // return otpResponse.data;
+
             const otpResponse = await firstValueFrom(
-                this.httpService.post('https://www.msegat.com/gw/sendOTPCode.php', {
-                    lang: 'En',
-                    userName: process.env.MSDGAT_USER_NAME,
-                    number: phoneOrEmail, // Use the input here if dynamic
-                    userSender: process.env.MSDGAT_SENDER_NAME || 'Nirami',
-                    apiKey: process.env.MSDGAT_API_KEY,
-                }),
+                this.httpService.post(
+                    'https://api.authentica.sa/api/v2/send-otp',
+                    {
+                        "method": "sms",
+                        "phone": phoneOrEmail,
+                        "template_id": 31,
+                        "fallback_email": "email@test.test"
+                        // lang: 'En',
+                        // number: phoneOrEmail,
+                        // userSender: process.env.MSDGAT_SENDER_NAME || 'Nirami',
+                    },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-Authorization': process.env.AUTHENTICA_API_KEY,
+                        },
+                    },
+                ),
             );
+
             return otpResponse.data;
         } catch (error) {
             throw new InternalServerErrorException('Failed to send OTP');

@@ -66,11 +66,9 @@ export class AuthService {
 
 
         const now = Date.now()
-        const { phoneOrEmail, code } = body;
-
-
-        // verify code 
-        const validation  = this.verifyOtp(phoneOrEmail, code)
+        const { phoneOrEmail } = body;
+        // // verify code 
+        // const validation  = this.verifyOtp(phoneOrEmail, code)
 
         const userExists = await this.usersService.findByEmailOrPhone(phoneOrEmail, phoneOrEmail);
         let user: User;
@@ -358,7 +356,8 @@ export class AuthService {
 
             return otpResponse.data;
         } catch (error) {
-            throw new InternalServerErrorException('Failed to send OTP');
+            return error
+            throw new InternalServerErrorException('Failed to verify OTP');
         }
     }
 

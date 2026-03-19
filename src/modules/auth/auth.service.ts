@@ -356,7 +356,6 @@ export class AuthService {
 
             return otpResponse.data;
         } catch (error) {
-            return error
             throw new InternalServerErrorException('Failed to verify OTP');
         }
     }

@@ -57,13 +57,7 @@ export class AuthService {
         console.log("Logging out user:", user);
     }
 
-    async loginWithOtp(body: { phoneOrEmail: string, code: string }) {
-
-
-
-
-
-
+    async loginWithOtp(body: { phoneOrEmail: string }) {
 
         const now = Date.now()
         const { phoneOrEmail } = body;

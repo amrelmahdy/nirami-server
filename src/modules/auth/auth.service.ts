@@ -57,10 +57,20 @@ export class AuthService {
         console.log("Logging out user:", user);
     }
 
-    async loginWithOtp(body: { phoneOrEmail: string }) {
+    async loginWithOtp(body: { phoneOrEmail: string, code: string }) {
+
+
+
+
+
+
 
         const now = Date.now()
-        const { phoneOrEmail } = body;
+        const { phoneOrEmail, code } = body;
+
+
+        // verify code 
+        const validation  = this.verifyOtp(phoneOrEmail, code)
 
         const userExists = await this.usersService.findByEmailOrPhone(phoneOrEmail, phoneOrEmail);
         let user: User;

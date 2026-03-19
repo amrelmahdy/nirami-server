@@ -335,7 +335,7 @@ export class AuthService {
         try {
             const otpResponse = await firstValueFrom(
                 this.httpService.post(
-                    'api.authentica.sa/api/v2/verify-otp',
+                    'https://api.authentica.sa/api/v2/verify-otp',
                     {
                         "phone": phoneOrEmail,
                         "email": "email@test.test",

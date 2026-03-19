@@ -15,9 +15,9 @@ export class OtpStrategy extends PassportStrategy(Strategy, 'otp') {
   }
 
   async validate(req: Request): Promise<any> {
-    const { otpId, code } = (req as any).body;
+    const { phone, code } = (req as any).body;
 
-    if (!otpId || !code) {
+    if (!phone || !code) {
       throw new UnauthorizedException('phone or email and OTP are required');
     }
 
